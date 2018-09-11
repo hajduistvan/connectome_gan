@@ -49,14 +49,14 @@ OPTIMIZER:
 
   GAN:
     G:
-      ALG: rmsprop # adam
+      ALG:  adam
       LR_ADAM: 1e-4
       LR_SGD: 1e-4
       LR_RMS: 1e-1
       MOMENTUM: 0.9
       BETAS: (0.5, 0.999)
     D:
-      ALG: rmsprop # adam
+      ALG: adam
       LR_ADAM: 1e-4
       LR_SGD: 1e-4
       LR_RMS: 1e-1

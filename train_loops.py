@@ -46,6 +46,7 @@ def train_classifier(net, CONFIG, trainloader, validloader, device, mix):
         save_dir = CONFIG.SAVE_DIR.CLASS.PURE
         log_dir = CONFIG.LOG_DIR.CLASS.PURE
         _str1 = 'pure'
+    os.makedirs(save_dir, exist_ok=True)
     if CONFIG.SUPERVISE_TYPE == 'binary':
         criterion = nn.CrossEntropyLoss().cuda()
     elif CONFIG.SUPERVISE_TYPE == 'regress':
@@ -314,19 +315,18 @@ def train_cond_wgan_gp(netD, netG, CONFIG, train_loader):
             )
 
             # consistency_cost
-            ct_cost = wgangp_fns.calc_consistency_penalty(
-                netD,
-                real_data.data,
-                real_labels,
-                CONFIG.ARCHITECTURE.GAN.CT_M
-            )
-            d_cost = d_fake - d_real + gradient_penalty * CONFIG.ARCHITECTURE.GAN.LAMBDA_GP \
-                                     + ct_cost * CONFIG.ARCHITECTURE.GAN.LAMBDA_CT
-
+            # ct_cost = wgangp_fns.calc_consistency_penalty(
+            #     netD,
+            #     real_data.data,
+            #     real_labels,
+            #     CONFIG.ARCHITECTURE.GAN.CT_M
+            # )
+            d_cost = d_fake - d_real + gradient_penalty * CONFIG.ARCHITECTURE.GAN.LAMBDA_GP# \
+                                     #+ ct_cost * CONFIG.ARCHITECTURE.GAN.LAMBDA_CT
             wasserstein_d = d_real - d_fake
 
             d_cost.backward()
-            print("disc backward happened")
+
             w_loss_meter.add(wasserstein_d.detach().cpu())
             d_loss_meter.add(d_cost.detach().cpu())
             r_loss_meter.add(d_real.detach().cpu())
@@ -349,12 +349,11 @@ def train_cond_wgan_gp(netD, netG, CONFIG, train_loader):
             CONFIG.ARCHITECTURE.GAN.NOISE_DIMS
         ).cuda()
         fake = netG(noise, fake_labels)
-        G, _ = netD(fake, fake_labels)
+        G  = netD(fake, fake_labels)
         G = G.mean()
 
         g_cost = -G
         g_cost.backward()
-        print("g backward happened")
         optimizerG.step()
         g_loss_meter.add(g_cost.detach().cpu())
 
@@ -368,6 +367,7 @@ def train_cond_wgan_gp(netD, netG, CONFIG, train_loader):
             writer.add_scalar("generator_loss", g_loss_meter.value()[0], iteration)
 
         if iteration % CONFIG.ITER_SAVE.GAN == 0:
+            os.makedirs(CONFIG.SAVE_DIR.GAN, exist_ok=True)
             torch.save(
                 netD.state_dict(),
                 os.path.join(CONFIG.SAVE_DIR.GAN, "checkpoint_disc_{}.pth".format(iteration)),
