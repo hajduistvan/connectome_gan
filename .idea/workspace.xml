@@ -1,7 +1,50 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="93ee8254-3969-4d3a-97c6-40f0c522fe86" name="Default" comment="" />
+    <list default="true" id="93ee8254-3969-4d3a-97c6-40f0c522fe86" name="Default" comment="">
+      <change afterPath="$PROJECT_DIR$/train_gan_val.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/conf_age_regr.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/conf_age_regr.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/debug.py" beforeDir="false" afterPath="$PROJECT_DIR$/debug.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/hyperparam_search.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/hyperparam_search.xlsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/runs/gan/age/regress/events.out.tfevents.1536650269.DESKTOP-9MGONJP" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/runs/gan/age/regress/events.out.tfevents.1536651563.DESKTOP-9MGONJP" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/runs/gan/age/regress/events.out.tfevents.1536651668.DESKTOP-9MGONJP" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/runs/gan/age/regress/events.out.tfevents.1536651692.DESKTOP-9MGONJP" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/runs/gan/age/regress/events.out.tfevents.1536651863.DESKTOP-9MGONJP" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/runs/gan/age/regress/events.out.tfevents.1536651887.DESKTOP-9MGONJP" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/runs/gan/age/regress/events.out.tfevents.1536651904.DESKTOP-9MGONJP" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/runs/gan/age/regress/events.out.tfevents.1536652273.DESKTOP-9MGONJP" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/runs/gan/age/regress/events.out.tfevents.1536652341.DESKTOP-9MGONJP" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/runs/gan/age/regress/events.out.tfevents.1536652884.DESKTOP-9MGONJP" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/runs/gan/age/regress/events.out.tfevents.1536652915.DESKTOP-9MGONJP" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/runs/gan/age/regress/events.out.tfevents.1536653016.DESKTOP-9MGONJP" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/runs/gan/age/regress/events.out.tfevents.1536653030.DESKTOP-9MGONJP" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/runs/gan/age/regress/events.out.tfevents.1536653630.DESKTOP-9MGONJP" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/runs/gan/age/regress/events.out.tfevents.1536653677.DESKTOP-9MGONJP" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/runs/gan/age/regress/events.out.tfevents.1536653716.DESKTOP-9MGONJP" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/runs/gan/age/regress/events.out.tfevents.1536653815.DESKTOP-9MGONJP" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/runs/gan/age/regress/events.out.tfevents.1536653951.DESKTOP-9MGONJP" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/runs/gan/age/regress/events.out.tfevents.1536654004.DESKTOP-9MGONJP" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/runs/gan/age/regress/events.out.tfevents.1536654116.DESKTOP-9MGONJP" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/runs/gan/age/regress/gen_img_it_100.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/runs/gan/age/regress/gen_img_it_125.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/runs/gan/age/regress/gen_img_it_25.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/runs/gan/age/regress/gen_img_it_50.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/runs/gan/age/regress/gen_img_it_75.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/save/gan/age/regress/checkpoint_disc_100.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/save/gan/age/regress/checkpoint_disc_125.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/save/gan/age/regress/checkpoint_disc_25.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/save/gan/age/regress/checkpoint_disc_50.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/save/gan/age/regress/checkpoint_disc_75.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/save/gan/age/regress/checkpoint_gen_100.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/save/gan/age/regress/checkpoint_gen_125.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/save/gan/age/regress/checkpoint_gen_25.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/save/gan/age/regress/checkpoint_gen_50.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/save/gan/age/regress/checkpoint_gen_75.pth" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/train.py" beforeDir="false" afterPath="$PROJECT_DIR$/train.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/train_loops.py" beforeDir="false" afterPath="$PROJECT_DIR$/train_loops.py" afterDir="false" />
+    </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -20,14 +63,17 @@
     <SUITE FILE_PATH="coverage/connectome_gan$train_aut_c__.coverage" NAME="train_aut_c-- Coverage Results" MODIFIED="1535617043182" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/connectome_gan$train_age_bin_c__.coverage" NAME="train_age_bin_c-- Coverage Results" MODIFIED="1535627137742" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/connectome_gan$train_age_bin___c.coverage" NAME="train_age_bin_--c Coverage Results" MODIFIED="1535634385526" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/connectome_gan$train_age_regr__g_.coverage" NAME="train_age_regr_-g- Coverage Results" MODIFIED="1536654111491" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/connectome_gan$train_age_regr__g_.coverage" NAME="train_age_regr_-g- Coverage Results" MODIFIED="1536825764920" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/connectome_gan$connectome_gan.coverage" NAME="connectome_gan Coverage Results" MODIFIED="1532678892458" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
     <SUITE FILE_PATH="coverage/connectome_gan$train_age_bin__gc.coverage" NAME="train_age_bin_-gc Coverage Results" MODIFIED="1535100426448" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/connectome_gan$train_new_age_regr__g_.coverage" NAME="train_new_age_regr_-g- Coverage Results" MODIFIED="1537428736100" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/connectome_gan$train_age_regr_c_c.coverage" NAME="train_age_regr_c-c Coverage Results" MODIFIED="1536049398101" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/connectome_gan$train_new_age_regr_c__.coverage" NAME="train_new_age_regr_c-- Coverage Results" MODIFIED="1536918056193" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/connectome_gan$train_age_bin_cgc.coverage" NAME="train_age_bin_cgc Coverage Results" MODIFIED="1535630349445" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/connectome_gan$train.coverage" NAME="train_aut_-g- Coverage Results" MODIFIED="1533895463469" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/connectome_gan$train_age_regr____.coverage" NAME="train_new_age_regr_--- Coverage Results" MODIFIED="1536917422471" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/connectome_gan$train_aut_c_c.coverage" NAME="train_aut_c-c Coverage Results" MODIFIED="1534339362993" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/connectome_gan$train_age_regr___c.coverage" NAME="train_age_regr_--c Coverage Results" MODIFIED="1536062601933" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/connectome_gan$train_age_regr___c.coverage" NAME="train_age_regr_--c Coverage Results" MODIFIED="1536664189311" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
   <component name="DatabaseView">
     <option name="SHOW_INTERMEDIATE" value="true" />
@@ -84,30 +130,30 @@
           <entry key="project.open.time.0" value="2" />
           <entry key="project.open.time.3" value="2" />
           <entry key="project.open.time.4" value="3" />
-          <entry key="project.open.time.5" value="4" />
+          <entry key="project.open.time.5" value="6" />
           <entry key="project.open.time.6" value="3" />
-          <entry key="project.opened" value="14" />
+          <entry key="project.opened" value="16" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
           <entry key="Python Console" value="1328" />
-          <entry key="dummy" value="23" />
-          <entry key="py" value="22598" />
-          <entry key="yaml" value="784" />
+          <entry key="dummy" value="52" />
+          <entry key="py" value="29512" />
+          <entry key="yaml" value="1173" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="PLAIN_TEXT" value="23" />
-          <entry key="Python" value="23926" />
-          <entry key="YAML" value="784" />
+          <entry key="PLAIN_TEXT" value="52" />
+          <entry key="Python" value="30840" />
+          <entry key="YAML" value="1173" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
         <counts>
           <entry key="csv" value="27" />
-          <entry key="py" value="76" />
+          <entry key="py" value="94" />
           <entry key="txt" value="7" />
           <entry key="yaml" value="15" />
         </counts>
@@ -116,8 +162,13 @@
         <counts>
           <entry key="CSV" value="26" />
           <entry key="PLAIN_TEXT" value="8" />
-          <entry key="Python" value="76" />
+          <entry key="Python" value="94" />
           <entry key="YAML" value="15" />
+        </counts>
+      </usages-collector>
+      <usages-collector id="statistics.vcs.git.usages">
+        <counts>
+          <entry key="git.branch.create.new" value="1" />
         </counts>
       </usages-collector>
     </session>
@@ -126,14 +177,14 @@
     <favorites_list name="connectome_gan" />
   </component>
   <component name="FileEditorManager">
-    <splitter split-orientation="horizontal" split-proportion="0.75097275">
+    <splitter split-orientation="horizontal" split-proportion="0.7427386">
       <split-first>
-        <leaf>
+        <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
           <file pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/train.py">
+            <entry file="file://$PROJECT_DIR$/train_gan_val.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state>
-                  <caret line="104" column="10" selection-start-line="104" selection-start-column="9" selection-end-line="104" selection-end-column="10" />
+                <state relative-caret-position="297">
+                  <caret line="31" column="30" selection-start-line="31" selection-start-column="30" selection-end-line="31" selection-end-column="30" />
                   <folding>
                     <element signature="e#0#12#0" expanded="true" />
                   </folding>
@@ -142,37 +193,69 @@
             </entry>
           </file>
           <file pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/train_loops.py">
+            <entry file="file://$PROJECT_DIR$/hyperparam_logger.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="1063">
-                  <caret line="352" column="20" selection-start-line="352" selection-start-column="20" selection-end-line="352" selection-end-column="20" />
+                <state relative-caret-position="1683">
+                  <caret line="99" column="39" selection-start-line="99" selection-start-column="39" selection-end-line="99" selection-end-column="39" />
                   <folding>
-                    <element signature="e#110#128#0" expanded="true" />
+                    <element signature="e#0#11#0" expanded="true" />
                   </folding>
                 </state>
               </provider>
             </entry>
           </file>
           <file pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/lib/models/wgangp_fns.py">
+            <entry file="file://$PROJECT_DIR$/lib/models/WGAN.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="400">
-                  <caret line="33" column="2" selection-start-line="33" selection-start-column="2" selection-end-line="33" selection-end-column="2" />
+                <state relative-caret-position="272">
+                  <caret line="55" column="49" selection-start-line="55" selection-start-column="49" selection-end-line="55" selection-end-column="49" />
                   <folding>
                     <element signature="e#90#102#0" expanded="true" />
+                    <marker date="1537428559726" expanded="true" signature="515:5768" ph="..." />
+                    <marker date="1537428559726" expanded="true" signature="1050:1054" ph="..." />
+                    <marker date="1537428559726" expanded="true" signature="1499:1504" ph="..." />
+                    <marker date="1537428559726" expanded="true" signature="2098:2099" ph="..." />
+                    <marker date="1537428559726" expanded="true" signature="7943:8569" ph="..." />
+                    <marker date="1537428559726" expanded="true" signature="9057:9121" ph="..." />
+                    <marker date="1537428559726" expanded="true" signature="16361:17176" ph="..." />
                   </folding>
                 </state>
               </provider>
             </entry>
           </file>
           <file pinned="false" current-in-tab="true">
-            <entry file="file://$PROJECT_DIR$/lib/models/cDCWGAN_GP.py">
+            <entry file="file://$PROJECT_DIR$/lib/models/convnet.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="346">
-                  <caret line="83" column="22" lean-forward="true" selection-start-line="83" selection-start-column="22" selection-end-line="83" selection-end-column="22" />
+                <state relative-caret-position="357">
+                  <caret line="103" column="43" lean-forward="true" selection-start-line="103" selection-start-column="43" selection-end-line="103" selection-end-column="43" />
                   <folding>
-                    <element signature="e#90#102#0" expanded="true" />
+                    <element signature="e#90#111#0" expanded="true" />
+                    <marker date="1537428718680" expanded="true" signature="2474:2857" ph="..." />
+                    <marker date="1537428718680" expanded="true" signature="2875:3516" ph="..." />
+                    <marker date="1537428718680" expanded="true" signature="3535:4795" ph="..." />
+                    <marker date="1537428718680" expanded="true" signature="5607:6599" ph="..." />
                   </folding>
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/lib/datasets/data_handler.py">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="646">
+                  <caret line="51" column="23" selection-start-line="51" selection-start-column="23" selection-end-line="51" selection-end-column="23" />
+                  <folding>
+                    <marker date="1536914755897" expanded="true" signature="2762:2771" ph="..." />
+                  </folding>
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/lib/datasets/__init__.py">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="68">
+                  <caret line="4" column="48" selection-start-line="4" selection-start-column="48" selection-end-line="4" selection-end-column="48" />
                 </state>
               </provider>
             </entry>
@@ -180,12 +263,12 @@
         </leaf>
       </split-first>
       <split-second>
-        <leaf>
+        <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
           <file pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/config/conf_age_regr.yaml">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="521">
-                  <caret line="73" column="19" lean-forward="true" selection-start-line="73" selection-start-column="19" selection-end-line="73" selection-end-column="19" />
+                <state relative-caret-position="1173">
+                  <caret line="69" column="18" lean-forward="true" selection-start-line="69" selection-start-column="18" selection-end-line="69" selection-end-column="18" />
                 </state>
               </provider>
             </entry>
@@ -204,26 +287,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>.cuda()</find>
-      <find>step</find>
-      <find>SPLit</find>
-      <find>BETA</find>
-      <find>l = make_tuple(s)</find>
-      <find>.LR</find>
-      <find>CHS</find>
-      <find>.cuda(</find>
-      <find>.to(device)</find>
-      <find>LongTen</find>
-      <find>Long</find>
-      <find>writer</find>
-      <find>iteration s</find>
-      <find>SummaryWriter</find>
-      <find>MovingAverageValueMeter</find>
-      <find>train_loss_meter</find>
-      <find>best</find>
-      <find>'Agg'</find>
-      <find>acc</find>
-      <find>print</find>
       <find>aut</find>
       <find>add</find>
       <find>bn_ca</find>
@@ -233,16 +296,45 @@
       <find>,1</find>
       <find>,8</find>
       <find>output</find>
+      <find>netD</find>
+      <find>rnd_lab_gen_fn</find>
+      <find>g_loss_meter</find>
+      <find>iteration</find>
+      <find>optimizer</find>
+      <find>data_frame</find>
+      <find>CONFIG</find>
+      <find>set_dirs</find>
+      <find>lambda</find>
+      <find>initialize_weights</find>
+      <find>gan_step</find>
       <find>save</find>
+      <find>_str1</find>
+      <find>best_valid_loss</find>
+      <find>rnd_label_generator</find>
+      <find>SPLIT</find>
+      <find>writer</find>
+      <find>rnd</find>
+      <find>tqd</find>
+      <find>dir</find>
+      <find>add_sc</find>
     </findStrings>
     <replaceStrings>
       <replace>.cuda()</replace>
       <replace>x</replace>
+      <replace>dataset</replace>
+      <replace>self.global_step</replace>
+      <replace>self.writer</replace>
+      <replace>config</replace>
     </replaceStrings>
   </component>
   <component name="Git.Settings">
     <option name="ROOT_SYNC" value="DONT_SYNC" />
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="consistency" />
+      </map>
+    </option>
   </component>
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
@@ -259,21 +351,25 @@
         <option value="$PROJECT_DIR$/wgangp_fns.py" />
         <option value="$PROJECT_DIR$/config/conf_age.yaml" />
         <option value="$PROJECT_DIR$/data_prepare.py" />
-        <option value="$PROJECT_DIR$/lib/datasets/__init__.py" />
         <option value="$PROJECT_DIR$/lib/datasets/age/data_prepare_age.py" />
-        <option value="$PROJECT_DIR$/lib/models/convnet.py" />
         <option value="$PROJECT_DIR$/config/conf_aut.yaml" />
         <option value="$PROJECT_DIR$/config/conf_age_bin.yaml" />
-        <option value="$PROJECT_DIR$/lib/datasets/data_handler.py" />
         <option value="$PROJECT_DIR$/debug.py" />
         <option value="$PROJECT_DIR$/evaluate.py" />
         <option value="$PROJECT_DIR$/hyperparam_logger.py" />
         <option value="$PROJECT_DIR$/train.py" />
         <option value="$PROJECT_DIR$/lib/models/cDCWGAN_GPCT.py" />
         <option value="$PROJECT_DIR$/lib/models/wgangp_fns.py" />
-        <option value="$PROJECT_DIR$/train_loops.py" />
-        <option value="$PROJECT_DIR$/config/conf_age_regr.yaml" />
+        <option value="$PROJECT_DIR$/lib/models/wgan.py" />
         <option value="$PROJECT_DIR$/lib/models/cDCWGAN_GP.py" />
+        <option value="$PROJECT_DIR$/train_loops.py" />
+        <option value="$PROJECT_DIR$/lib/models/ACGAN.py" />
+        <option value="$PROJECT_DIR$/lib/datasets/__init__.py" />
+        <option value="$PROJECT_DIR$/lib/datasets/data_handler.py" />
+        <option value="$PROJECT_DIR$/train_gan_val.py" />
+        <option value="$PROJECT_DIR$/lib/models/WGAN.py" />
+        <option value="$PROJECT_DIR$/lib/models/convnet.py" />
+        <option value="$PROJECT_DIR$/config/conf_age_regr.yaml" />
       </list>
     </option>
   </component>
@@ -294,6 +390,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -315,13 +412,25 @@
               <item name="connectome_gan" type="b2602c69:ProjectViewProjectNode" />
               <item name="connectome_gan" type="462c0819:PsiDirectoryNode" />
               <item name="lib" type="462c0819:PsiDirectoryNode" />
+              <item name="datasets" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="connectome_gan" type="b2602c69:ProjectViewProjectNode" />
+              <item name="connectome_gan" type="462c0819:PsiDirectoryNode" />
+              <item name="lib" type="462c0819:PsiDirectoryNode" />
+              <item name="datasets" type="462c0819:PsiDirectoryNode" />
+              <item name="autism" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="connectome_gan" type="b2602c69:ProjectViewProjectNode" />
+              <item name="connectome_gan" type="462c0819:PsiDirectoryNode" />
+              <item name="lib" type="462c0819:PsiDirectoryNode" />
               <item name="models" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -367,7 +476,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.train_age_regr_-g-">
+  <component name="RunManager" selected="Python.train_new_age_regr_-g-">
     <configuration name="connectome_gan" type="JupiterNotebook" factoryName="Jupyter Notebook">
       <module name="connectome_gan" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -408,7 +517,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="train_age_bin_--c" type="PythonConfigurationType" factoryName="Python">
+    <configuration name="train_new_age_regr_---" type="PythonConfigurationType" factoryName="Python">
       <module name="connectome_gan" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -421,8 +530,8 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/train.py" />
-      <option name="PARAMETERS" value="--config config/conf_age_bin.yaml --mode --c" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/train_gan_val.py" />
+      <option name="PARAMETERS" value="--config config/conf_age_regr.yaml --mode ---" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
@@ -430,7 +539,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="train_age_bin_-g-" type="PythonConfigurationType" factoryName="Python">
+    <configuration name="train_new_age_regr_-g-" type="PythonConfigurationType" factoryName="Python">
       <module name="connectome_gan" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -443,8 +552,8 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/train.py" />
-      <option name="PARAMETERS" value="--config config/conf_age_bin.yaml --mode -g-" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/train_gan_val.py" />
+      <option name="PARAMETERS" value="--config config/conf_age_regr.yaml --mode -g- --run_name run_1" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
@@ -452,7 +561,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="train_age_bin_-gc" type="PythonConfigurationType" factoryName="Python">
+    <configuration name="train_new_age_regr_c--" type="PythonConfigurationType" factoryName="Python">
       <module name="connectome_gan" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -465,316 +574,8 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/train.py" />
-      <option name="PARAMETERS" value="--config config/conf_age_bin.yaml --mode -gc" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="train_age_bin_c--" type="PythonConfigurationType" factoryName="Python">
-      <module name="connectome_gan" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/train.py" />
-      <option name="PARAMETERS" value="--config config/conf_age_bin.yaml --mode c--" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="train_age_bin_c-c" type="PythonConfigurationType" factoryName="Python">
-      <module name="connectome_gan" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/train.py" />
-      <option name="PARAMETERS" value="--config config/conf_age_bin.yaml --mode c-c" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="train_age_bin_cgc" type="PythonConfigurationType" factoryName="Python">
-      <module name="connectome_gan" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/train.py" />
-      <option name="PARAMETERS" value="--config config/conf_age_bin.yaml --mode cgc" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="train_age_regr_--c" type="PythonConfigurationType" factoryName="Python">
-      <module name="connectome_gan" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/train.py" />
-      <option name="PARAMETERS" value="--config config/conf_age_regr.yaml --mode --c" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="train_age_regr_-g-" type="PythonConfigurationType" factoryName="Python">
-      <module name="connectome_gan" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/train.py" />
-      <option name="PARAMETERS" value="--config config/conf_age_regr.yaml --mode -g-" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="train_age_regr_-gc" type="PythonConfigurationType" factoryName="Python">
-      <module name="connectome_gan" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/train.py" />
-      <option name="PARAMETERS" value="--config config/conf_age_regr.yaml --mode -gc" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="train_age_regr_c--" type="PythonConfigurationType" factoryName="Python">
-      <module name="connectome_gan" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/train.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/train_gan_val.py" />
       <option name="PARAMETERS" value="--config config/conf_age_regr.yaml --mode c--" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="train_age_regr_c-c" type="PythonConfigurationType" factoryName="Python">
-      <module name="connectome_gan" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/train.py" />
-      <option name="PARAMETERS" value="--config config/conf_age_regr.yaml --mode c-c" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="train_age_regr_cg-" type="PythonConfigurationType" factoryName="Python">
-      <module name="connectome_gan" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/train.py" />
-      <option name="PARAMETERS" value="--config config/conf_age_regr.yaml --mode cg-" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="train_age_regr_cgc" type="PythonConfigurationType" factoryName="Python">
-      <module name="connectome_gan" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/train.py" />
-      <option name="PARAMETERS" value="--config config/conf_age_regr.yaml --mode cgc" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="train_aut_-g-" type="PythonConfigurationType" factoryName="Python">
-      <module name="connectome_gan" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/train.py" />
-      <option name="PARAMETERS" value="--config config/conf_aut.yaml --mode -g-" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="train_aut_c--" type="PythonConfigurationType" factoryName="Python">
-      <module name="connectome_gan" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/train.py" />
-      <option name="PARAMETERS" value="--config config/conf_aut.yaml --mode c--" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="train_aut_c-c" type="PythonConfigurationType" factoryName="Python">
-      <module name="connectome_gan" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/train.py" />
-      <option name="PARAMETERS" value="--config config/conf_aut.yaml --mode c-c" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="train_aut_cgc" type="PythonConfigurationType" factoryName="Python">
-      <module name="connectome_gan" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/train.py" />
-      <option name="PARAMETERS" value="--config config/conf_aut.yaml --mode cgc" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
@@ -784,23 +585,9 @@
     </configuration>
     <list>
       <item itemvalue="Jupyter Notebook.connectome_gan" />
-      <item itemvalue="Python.train_aut_-g-" />
-      <item itemvalue="Python.train_aut_c--" />
-      <item itemvalue="Python.train_aut_cgc" />
-      <item itemvalue="Python.train_aut_c-c" />
-      <item itemvalue="Python.train_age_bin_cgc" />
-      <item itemvalue="Python.train_age_bin_c-c" />
-      <item itemvalue="Python.train_age_bin_--c" />
-      <item itemvalue="Python.train_age_bin_c--" />
-      <item itemvalue="Python.train_age_bin_-g-" />
-      <item itemvalue="Python.train_age_bin_-gc" />
-      <item itemvalue="Python.train_age_regr_cgc" />
-      <item itemvalue="Python.train_age_regr_cg-" />
-      <item itemvalue="Python.train_age_regr_--c" />
-      <item itemvalue="Python.train_age_regr_c-c" />
-      <item itemvalue="Python.train_age_regr_-g-" />
-      <item itemvalue="Python.train_age_regr_-gc" />
-      <item itemvalue="Python.train_age_regr_c--" />
+      <item itemvalue="Python.train_new_age_regr_---" />
+      <item itemvalue="Python.train_new_age_regr_c--" />
+      <item itemvalue="Python.train_new_age_regr_-g-" />
     </list>
   </component>
   <component name="SvnConfiguration">
@@ -829,21 +616,21 @@
     <frame x="-8" y="-8" width="1936" height="1176" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.49946865" visible="true" weight="0.17803837" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.49946865" visible="true" weight="0.10181237" />
       <window_info id="Structure" order="1" sideWeight="0.5005314" side_tool="true" weight="0.09322917" />
       <window_info id="Favorites" order="2" sideWeight="0.5005314" side_tool="true" weight="0.09322917" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.12763916" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.27927062" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.36180422" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.39923224" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" weight="0.32917467" />
       <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
       <window_info anchor="bottom" id="Database Changes" order="8" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Terminal" order="9" weight="0.23800384" />
+      <window_info anchor="bottom" id="Terminal" order="9" weight="0.23704414" />
       <window_info anchor="bottom" id="Event Log" order="10" sideWeight="0.5010661" side_tool="true" weight="0.45010847" />
-      <window_info anchor="bottom" id="Version Control" order="11" />
+      <window_info anchor="bottom" id="Version Control" order="11" weight="0.32917467" />
       <window_info anchor="bottom" id="Python Console" order="12" sideWeight="0.4989339" weight="0.30902112" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
@@ -887,7 +674,6 @@
     <entry file="file://$PROJECT_DIR$/1.py" />
     <entry file="file://$PROJECT_DIR$/asd.py" />
     <entry file="file://C:/Program Files/Anaconda3/Lib/site-packages/torch/nn/modules/rnn.py" />
-    <entry file="file://C:/Program Files/Anaconda3/Lib/site-packages/torch/nn/modules/module.py" />
     <entry file="file://$PROJECT_DIR$/notebook.ipynb" />
     <entry file="file://$PROJECT_DIR$/../../pytorch_projects/autism/train.py" />
     <entry file="file://$PROJECT_DIR$/../../tensorflow_projects/GAN/gan_mnist/v10/estimator_crossvalid.py" />
@@ -921,13 +707,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="411">
           <caret line="166" column="11" selection-start-line="166" selection-start-column="11" selection-end-line="166" selection-end-column="11" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lib/datasets/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="51">
-          <caret line="3" column="4" selection-start-line="3" selection-start-column="4" selection-end-line="3" selection-end-column="4" />
         </state>
       </provider>
     </entry>
@@ -979,37 +758,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/lib/datasets/data_handler.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="533">
-          <caret line="93" column="65" selection-start-line="93" selection-start-column="65" selection-end-line="93" selection-end-column="65" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://C:/Program Files/Anaconda3/Lib/site-packages/torch/optim/adam.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="242">
           <caret line="30" selection-start-line="30" selection-end-line="30" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lib/models/convnet.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="493">
-          <caret line="41" selection-start-line="41" selection-end-line="41" />
-          <folding>
-            <element signature="e#90#111#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/hyperparam_logger.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1445">
-          <caret line="98" column="39" selection-start-line="98" selection-start-column="39" selection-end-line="98" selection-end-column="39" />
-          <folding>
-            <element signature="e#0#11#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1027,13 +779,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/lib/models/cDCWGAN_GPCT.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="731">
-          <caret line="43" column="26" lean-forward="true" selection-start-line="43" selection-start-column="26" selection-end-line="43" selection-end-column="26" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/models/cDCWGAN_GPCT.py" />
     <entry file="file://$PROJECT_DIR$/debug.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="295">
@@ -1086,50 +832,132 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/lib/models/wgangp_fns.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-635">
+          <caret line="60" column="20" lean-forward="true" selection-start-line="60" selection-start-column="20" selection-end-line="60" selection-end-column="20" />
+          <folding>
+            <element signature="e#90#102#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/models/ACGAN.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://C:/Program Files/Anaconda3/Lib/site-packages/torch/nn/modules/batchnorm.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="242">
+          <caret line="55" column="6" selection-start-line="55" selection-start-column="6" selection-end-line="55" selection-end-column="6" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://C:/Program Files/Anaconda3/Lib/site-packages/torch/nn/modules/conv.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="242">
+          <caret line="300" selection-start-line="300" selection-end-line="300" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/train.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret line="104" column="10" selection-start-line="104" selection-start-column="9" selection-end-line="104" selection-end-column="10" />
+        <state relative-caret-position="527">
+          <caret line="31" column="19" lean-forward="true" selection-start-line="31" selection-start-column="19" selection-end-line="31" selection-end-column="19" />
           <folding>
             <element signature="e#0#12#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/lib/models/wgangp_fns.py">
+    <entry file="file://C:/Program Files/Anaconda3/Lib/site-packages/torch/nn/modules/module.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="400">
-          <caret line="33" column="2" selection-start-line="33" selection-start-column="2" selection-end-line="33" selection-end-column="2" />
+        <state relative-caret-position="242">
+          <caret line="531" selection-start-line="531" selection-end-line="531" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/datasets/data_handler.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="646">
+          <caret line="51" column="23" selection-start-line="51" selection-start-column="23" selection-end-line="51" selection-end-column="23" />
           <folding>
-            <element signature="e#90#102#0" expanded="true" />
+            <marker date="1536914755897" expanded="true" signature="2762:2771" ph="..." />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/datasets/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="68">
+          <caret line="4" column="48" selection-start-line="4" selection-start-column="48" selection-end-line="4" selection-end-column="48" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/train_loops.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1063">
-          <caret line="352" column="20" selection-start-line="352" selection-start-column="20" selection-end-line="352" selection-end-column="20" />
+        <state relative-caret-position="391">
+          <caret line="41" column="20" selection-start-line="41" selection-start-column="20" selection-end-line="41" selection-end-column="20" />
           <folding>
             <element signature="e#110#128#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/config/conf_age_regr.yaml">
+    <entry file="file://$PROJECT_DIR$/hyperparam_logger.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="521">
-          <caret line="73" column="19" lean-forward="true" selection-start-line="73" selection-start-column="19" selection-end-line="73" selection-end-column="19" />
+        <state relative-caret-position="1683">
+          <caret line="99" column="39" selection-start-line="99" selection-start-column="39" selection-end-line="99" selection-end-column="39" />
+          <folding>
+            <element signature="e#0#11#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/lib/models/cDCWGAN_GP.py">
+    <entry file="file://$PROJECT_DIR$/train_gan_val.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="346">
-          <caret line="83" column="22" lean-forward="true" selection-start-line="83" selection-start-column="22" selection-end-line="83" selection-end-column="22" />
+        <state relative-caret-position="297">
+          <caret line="31" column="30" selection-start-line="31" selection-start-column="30" selection-end-line="31" selection-end-column="30" />
+          <folding>
+            <element signature="e#0#12#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/models/WGAN.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="272">
+          <caret line="55" column="49" selection-start-line="55" selection-start-column="49" selection-end-line="55" selection-end-column="49" />
           <folding>
             <element signature="e#90#102#0" expanded="true" />
+            <marker date="1537428559726" expanded="true" signature="515:5768" ph="..." />
+            <marker date="1537428559726" expanded="true" signature="1050:1054" ph="..." />
+            <marker date="1537428559726" expanded="true" signature="1499:1504" ph="..." />
+            <marker date="1537428559726" expanded="true" signature="2098:2099" ph="..." />
+            <marker date="1537428559726" expanded="true" signature="7943:8569" ph="..." />
+            <marker date="1537428559726" expanded="true" signature="9057:9121" ph="..." />
+            <marker date="1537428559726" expanded="true" signature="16361:17176" ph="..." />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/models/convnet.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="357">
+          <caret line="103" column="43" lean-forward="true" selection-start-line="103" selection-start-column="43" selection-end-line="103" selection-end-column="43" />
+          <folding>
+            <element signature="e#90#111#0" expanded="true" />
+            <marker date="1537428718680" expanded="true" signature="2474:2857" ph="..." />
+            <marker date="1537428718680" expanded="true" signature="2875:3516" ph="..." />
+            <marker date="1537428718680" expanded="true" signature="3535:4795" ph="..." />
+            <marker date="1537428718680" expanded="true" signature="5607:6599" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/config/conf_age_regr.yaml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1173">
+          <caret line="69" column="18" lean-forward="true" selection-start-line="69" selection-start-column="18" selection-end-line="69" selection-end-column="18" />
         </state>
       </provider>
     </entry>

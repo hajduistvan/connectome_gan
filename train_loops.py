@@ -35,7 +35,6 @@ def get_loss_denorm_fn(CONFIG):
 # Connectome classifier
 
 def train_classifier(net, CONFIG, trainloader, validloader, device, mix):
-    # Criterion (classifier!!!)
     loss_denorm_fn = get_loss_denorm_fn(CONFIG)
     net.train()
     if mix:
@@ -264,6 +263,7 @@ def train_cond_wgan_gp(netD, netG, CONFIG, train_loader):
     r_loss_meter = MovingAverageValueMeter(5)
     f_loss_meter = MovingAverageValueMeter(5)
     gp_loss_meter = MovingAverageValueMeter(5)
+    ct_loss_meter = MovingAverageValueMeter(5)
     g_loss_meter = MovingAverageValueMeter(5)
 
     for iteration in tqdm(
@@ -292,7 +292,8 @@ def train_cond_wgan_gp(netD, netG, CONFIG, train_loader):
             netD.zero_grad()
 
             # train with real
-            d_real = netD(real_data, real_labels)[0].mean()
+            d_real, _ = netD(real_data, real_labels)
+            d_real = d_real.mean()
 
             # train with fake
             noise = torch.randn(
@@ -302,7 +303,8 @@ def train_cond_wgan_gp(netD, netG, CONFIG, train_loader):
 
             fake = netG(noise, real_labels).data
 
-            d_fake = netD(fake, real_labels)[0].mean()
+            d_fake, _ = netD(fake, real_labels)
+            d_fake = d_fake.mean()
 
             fake_sq = fake.view(-1, 1, CONFIG.MATR_SIZE, CONFIG.MATR_SIZE)
 
@@ -315,14 +317,14 @@ def train_cond_wgan_gp(netD, netG, CONFIG, train_loader):
             )
 
             # consistency_cost
-            # ct_cost = wgangp_fns.calc_consistency_penalty(
-            #     netD,
-            #     real_data.data,
-            #     real_labels,
-            #     CONFIG.ARCHITECTURE.GAN.CT_M
-            # )
-            d_cost = d_fake - d_real + gradient_penalty * CONFIG.ARCHITECTURE.GAN.LAMBDA_GP# \
-                                     #+ ct_cost * CONFIG.ARCHITECTURE.GAN.LAMBDA_CT
+            ct_cost = wgangp_fns.calc_consistency_penalty(
+                netD,
+                real_data.data,
+                real_labels,
+                CONFIG.ARCHITECTURE.GAN.CT_M
+            )
+            d_cost = d_fake - d_real + gradient_penalty * CONFIG.ARCHITECTURE.GAN.LAMBDA_GP \
+                                     + ct_cost * CONFIG.ARCHITECTURE.GAN.LAMBDA_CT
             wasserstein_d = d_real - d_fake
 
             d_cost.backward()
@@ -332,6 +334,7 @@ def train_cond_wgan_gp(netD, netG, CONFIG, train_loader):
             r_loss_meter.add(d_real.detach().cpu())
             f_loss_meter.add(d_fake.detach().cpu())
             gp_loss_meter.add(gradient_penalty.detach().cpu())
+            ct_loss_meter.add(ct_cost.detach().cpu())
 
             optimizerD.step()
 
@@ -349,7 +352,7 @@ def train_cond_wgan_gp(netD, netG, CONFIG, train_loader):
             CONFIG.ARCHITECTURE.GAN.NOISE_DIMS
         ).cuda()
         fake = netG(noise, fake_labels)
-        G  = netD(fake, fake_labels)
+        G,_ = netD(fake, fake_labels)
         G = G.mean()
 
         g_cost = -G
@@ -364,6 +367,7 @@ def train_cond_wgan_gp(netD, netG, CONFIG, train_loader):
             writer.add_scalar("disc_real_loss", r_loss_meter.value()[0], iteration)
             writer.add_scalar("disc_fake_loss", d_loss_meter.value()[0], iteration)
             writer.add_scalar("gradient_penalty", gp_loss_meter.value()[0], iteration)
+            writer.add_scalar("consistency_cost", ct_loss_meter.value()[0], iteration)
             writer.add_scalar("generator_loss", g_loss_meter.value()[0], iteration)
 
         if iteration % CONFIG.ITER_SAVE.GAN == 0:
