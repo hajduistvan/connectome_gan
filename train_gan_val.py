@@ -4,12 +4,9 @@ import torch
 import yaml
 from addict import Dict
 from lib.datasets import get_dataset
-from lib.models import convnet, WGAN, wgangp_fns
+from lib.models import convnet, WGAN, ACWGAN
 from lib.datasets.autism import data_prepare_aut
 from lib.datasets.age import data_prepare_age
-import train_loops
-import evaluate
-from ast import literal_eval as make_tuple
 from hyperparam_logger import save_params
 
 @click.command()
@@ -19,7 +16,6 @@ from hyperparam_logger import save_params
 def main(config, run_name, mode):
     cuda = torch.cuda.is_available()
     cuda = cuda and torch.cuda.is_available()
-    device = torch.device("cuda" if cuda else "cpu")
 
     if cuda:
         current_device = torch.cuda.current_device()
@@ -100,7 +96,7 @@ def main(config, run_name, mode):
 
     if mode == '-g-':
 
-        gan = WGAN.WGAN(config, train_dataset, val_loader)
+        gan = ACWGAN.ACWGAN(config, train_dataset, val_loader)
         gan.netg.cuda()
         gan.netd.cuda()
         best_val = gan.train()
@@ -163,7 +159,7 @@ def main(config, run_name, mode):
     # if mode[2] == 'c':
     #     print('Extracting gen images\n')
     #     if mode[1] == '-':
-    #         netG = WGAN.Generator(
+    #         netG = ACWGAN.Generator(
     #             config.ARCHITECTURE.GAN.DIM,
     #             config.MATR_SIZE,
     #             config.ARCHITECTURE.GAN.NOISE_DIMS

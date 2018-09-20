@@ -210,7 +210,7 @@ def train_classifier(net, CONFIG, trainloader, validloader, device, mix):
     return dict
 
 
-# Connectome Conditional WGAN-BP
+# Connectome Conditional ACWGAN-BP
 
 
 def train_cond_wgan_gp(netD, netG, CONFIG, train_loader):
