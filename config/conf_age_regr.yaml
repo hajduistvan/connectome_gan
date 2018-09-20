@@ -1,74 +1,58 @@
-DATASET: age
+DATASET: age_small
 RELATIVE_DATA_FOLDER: lib/datasets/age/
 DATASET_PART: age_part.npz
-SPLIT:
-  TRAIN: train
-  VAL: val
-  TEST: test
+
 SUPERVISE_TYPE: regress
-CLASS_FROZEN_INIT_FILENAME: baseline.pth
+CLASS_FROZEN_INIT_FILENAME: frozen_init.pth
 MATR_SIZE: 111
 BATCH_SIZE:
   CLASS:
-    TRAIN: 64
+    TRAIN: 128
     VAL: 64
     TEST: 128
   GAN:
-    TRAIN: 32
-    VAL: 32
-    TEST: 32
-    GENERATE: 50
+    TRAIN: 64
+    GENERATE: 100
 NUM_WORKERS:
   CLASS: 0
   GAN: 0
 ITER_MAX:
-  CLASS: 20001
-  GAN: 501 # 501
-ITER_VAL: 100
+  CLASS: 30001
+  GAN: 3001
+ITER_VAL:
+  CLASS: 100
+  GAN: 50
 ITER_SAVE:
-  CLASS: 2500
-  GAN: 25
+#  CLASS: 5000
+  GAN: 50
 ITER_TB:
   CLASS: 10
   GAN: 1
-LOG_DIR:
-  CLASS:
-    PURE: runs/classifier/age/regress/pure
-    MIXED: runs/classifier/age/regress/mixed
-  GAN: runs/gan/age/regress
-SAVE_DIR:
-  CLASS:
-    PURE: save/classifier/age/regress/pure
-    MIXED: save/classifier/age/regress/mixed
-  GAN: save/gan/age/regress
 OPTIMIZER:
   CLASS:
     ALG: adam
     LR_ADAM: 1e-4
-    BETAS: (0.9, 0.999)
-
+    BETAS: (0.9, 0.9)
   GAN:
     G:
-      ALG: rmsprop # adam
+      ALG: adam
       LR_ADAM: 1e-4
-      LR_SGD: 1e-4
-      LR_RMS: 1e-1
-      MOMENTUM: 0.9
-      BETAS: (0.5, 0.999)
+#      LR_SGD: 1e-4
+#      LR_RMS: 1e-4
+#      MOMENTUM: 0.2
+      BETAS: (0.5, 0.9)
     D:
-      ALG: rmsprop # adam
+      ALG: adam
       LR_ADAM: 1e-4
-      LR_SGD: 1e-4
-      LR_RMS: 1e-1
-      MOMENTUM: 0.3
-      BETAS: (0.5, 0.999)
+#      LR_SGD: 1e-4
+#      LR_RMS: 1e-4
+#      MOMENTUM: 0.2
+      BETAS: (0.5, 0.9)
 ARCHITECTURE:
   CLASS:
     CHS: (32, 64)
     NEURONS: (32, 16, 1)
     DROPOUT: 0.5
-    DROPOUT_LAYERS: (1, 1, 1, 1)
-    BN_LAYERS: (1, 1, 1, 1)
     LOSS_FN: L1
   GAN:
     NOISE_DIMS: 111
@@ -78,9 +62,9 @@ ARCHITECTURE:
     LAMBDA_GP: 10
     LAMBDA_CT: 0 # Use 0 if no CT wanted
     CT_M: 0
-SPLIT_LIMITS: (0.7, 0.9)
+#SPLIT_LIMITS: (0.7, 0.9)
 AGE_INTERVAL: (19, 89)
-OUTLY_MIXER: 0.5
-OUTLY_THRESHOLD: 0.0025
+#OUTLY_MIXER: 0.5
+#OUTLY_THRESHOLD: 0.0025
 GEN_IMG_NUM: 16000
-GEN_EARLY_IT: 100
+#GEN_EARLY_IT: 385

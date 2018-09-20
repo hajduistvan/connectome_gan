@@ -4,7 +4,7 @@ import torch
 import yaml
 from addict import Dict
 from lib.datasets import get_dataset
-from lib.models import convnet, cDCWGAN_GP, wgangp_fns
+from lib.models import convnet, WGAN, wgangp_fns
 from lib.datasets.autism import data_prepare_aut
 from lib.datasets.age import data_prepare_age
 import train_loops
@@ -92,13 +92,13 @@ if mode[0] == 'c':
         make_tuple(CONFIG.ARCHITECTURE.CLASS.BN_LAYERS),
     ).cuda()
 if mode[1] == 'g':
-    netG = cDCWGAN_GP.Generator(
+    netG = WGAN.Generator(
         CONFIG.ARCHITECTURE.GAN.DIM,
         CONFIG.MATR_SIZE,
         CONFIG.ARCHITECTURE.GAN.NOISE_DIMS,
         # CONFIG.ARCHITECTURE.GAN.DROPOUT
     ).cuda()
-    netD = cDCWGAN_GP.Discriminator(
+    netD = WGAN.Discriminator(
         CONFIG.ARCHITECTURE.GAN.DIM,
         CONFIG.MATR_SIZE,
         # CONFIG.ARCHITECTURE.GAN.DROPOUT
@@ -154,7 +154,7 @@ if mode[1] == 'g':
 if mode[2] == 'c':
     print('Extracting gen images\n')
     if mode[1] == '-':
-        netG = cDCWGAN_GP.Generator(
+        netG = WGAN.Generator(
             CONFIG.ARCHITECTURE.GAN.DIM,
             CONFIG.MATR_SIZE,
             CONFIG.ARCHITECTURE.GAN.NOISE_DIMS
