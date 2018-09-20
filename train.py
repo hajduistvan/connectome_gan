@@ -3,10 +3,10 @@ import click
 import torch
 import yaml
 from addict import Dict
-from lib.datasets import get_dataset
-from lib.models import convnet, WGAN, wgangp_fns
-from lib.datasets.autism import data_prepare_aut
-from lib.datasets.age import data_prepare_age
+from libs.datasets import get_dataset
+from libs.models import convnet, WGAN, wgangp_fns
+from libs.datasets.autism import data_prepare_aut
+from libs.datasets.age import data_prepare_age
 import train_loops
 import evaluate
 from ast import literal_eval as make_tuple

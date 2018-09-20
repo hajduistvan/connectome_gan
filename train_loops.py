@@ -15,7 +15,7 @@ from ast import literal_eval as make_tuple
 
 # Internal imports
 # import local_networks as nets
-from lib.models import wgangp_fns
+from libs.models import wgangp_fns
 from tqdm import tqdm
 from tensorboardX import SummaryWriter
 from torchnet.meter import MovingAverageValueMeter

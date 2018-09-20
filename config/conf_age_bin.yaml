@@ -1,5 +1,5 @@
 DATASET: age
-RELATIVE_DATA_FOLDER: lib/datasets/age/
+RELATIVE_DATA_FOLDER: libs/datasets/age/
 #DATASET_WHOLE: autism_dataset_whole.npz
 DATASET_PART: age_part.npz
 SPLIT:
