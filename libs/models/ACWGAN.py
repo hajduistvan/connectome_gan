@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-Created on Thu Jul 12 10:37:48 2018
-
-@author: hajduistvan
+@author István Hajdu at MTA TTK
+https://github.com/hajduistvan/connectome_gan
 """
 import torch
 import torch.nn as nn
@@ -237,14 +236,14 @@ class Generator(nn.Module):
         self.d_fake_critic, self.d_fake_pred = netd(fake)
         self.d_fake_critic = self.d_fake_critic.mean()
         self.fake_regr_loss = self.regr_loss_fn(self.d_fake_pred, fake_labels)
-        self.g_cost = - self.d_fake_critic - self.fake_regr_loss
+        self.g_cost = - self.d_fake_critic - self.fake_regr_loss * self.gan_architecture.LAMBDA_REGR
         self.g_cost.backward()
         self.optimizer.step()
         self.hook_fn()
 
     def hook_fn(self):
         self.g_critic_loss_meter.add(self.d_fake_critic.cpu())
-        self.g_pred_loss_meter.add(self.fake_regr_loss.cpu())
+        self.g_pred_loss_meter.add(self.loss_denorm_fn(self.fake_regr_loss.cpu()))
         self.g_loss_meter.add(self.g_cost.detach().cpu())
 
     def get_optimizer(self):
@@ -330,7 +329,10 @@ class Generator(nn.Module):
             plt.axis('off')
         plt.savefig(filename)
         self.train()
-
+    def loss_denorm_fn(self, x):
+        age_m = make_tuple(self.config.AGE_INTERVAL)[0]
+        age_M = make_tuple(self.config.AGE_INTERVAL)[1]
+        return x * (age_M - age_m)
 
 class Discriminator(nn.Module):
     def __init__(self, config):
@@ -450,7 +452,9 @@ class Discriminator(nn.Module):
 
         self.fake_regr_loss = self.regr_loss_fn(self.d_fake_pred.view(-1,1), real_labels)
 
-        self.d_cost = self.d_fake_critic - self.d_real_critic + self.real_regr_loss + self.fake_regr_loss
+        self.d_cost = self.d_fake_critic - self.d_real_critic \
+                      + self.gan_architecture.LAMBDA_REGR * self.real_regr_loss \
+                      + self.gan_architecture.LAMBDA_REGR * self.fake_regr_loss
         # train with gradient penalty
         if not self.lambda_gp == 0:
             self.gradient_penalty = self.calc_gradient_penalty_cond(
@@ -476,8 +480,8 @@ class Discriminator(nn.Module):
 
         self.w_loss_meter.add(self.wasserstein_d.detach().cpu())
         self.d_loss_meter.add(self.d_cost.detach().cpu())
-        self.d_real_regr_loss_meter.add(self.fake_regr_loss.detach().cpu())
-        self.d_fake_regr_loss_meter.add(self.real_regr_loss.detach().cpu())
+        self.d_real_regr_loss_meter.add(self.loss_denorm_fn(self.fake_regr_loss.detach().cpu()))
+        self.d_fake_regr_loss_meter.add(self.loss_denorm_fn(self.real_regr_loss.detach().cpu()))
         self.r_c_loss_meter.add(self.d_real_critic.detach().cpu())
         self.f_c_loss_meter.add(self.d_fake_critic.detach().cpu())
 
@@ -507,3 +511,7 @@ class Discriminator(nn.Module):
 
         consistency_term = (d1 - d2).norm(2, dim=0) + 0.1 * (d_1 - d_2).norm(2, dim=1) - self.ct_m
         return consistency_term.mean()
+    def loss_denorm_fn(self, x):
+        age_m = make_tuple(self.config.AGE_INTERVAL)[0]
+        age_M = make_tuple(self.config.AGE_INTERVAL)[1]
+        return x * (age_M - age_m)

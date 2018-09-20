@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-Created on Thu Jul 12 10:37:48 2018
-
-@author: hajduistvan
+@author István Hajdu at MTA TTK
+https://github.com/hajduistvan/connectome_gan
 """
 import torch
 import torch.nn as nn

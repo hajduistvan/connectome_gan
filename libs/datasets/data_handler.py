@@ -1,16 +1,10 @@
-import glob
-import os.path as osp
-import random
-from collections import defaultdict
-from glob import glob
-
-# import cv2
-import h5py
+"""
+@ author István Hajdu at MTA TTK
+https://github.com/hajduistvan/connectome_gan
+"""
 import numpy as np
-import scipy.io as sio
 import torch
 from torch.utils import data
-from tqdm import tqdm
 from ast import literal_eval as make_tuple
 
 

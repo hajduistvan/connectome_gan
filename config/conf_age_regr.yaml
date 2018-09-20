@@ -59,6 +59,7 @@ ARCHITECTURE:
     DIM: 48
     CRITIC_ITERS: 3
     DROPOUT: 0.5
+    LAMBDA_REGR: 10
     LAMBDA_GP: 10
     LAMBDA_CT: 0 # Use 0 if no CT wanted
     CT_M: 0

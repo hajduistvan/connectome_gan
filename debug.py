@@ -1,3 +1,7 @@
+"""
+@ author István Hajdu at MTA TTK
+https://github.com/hajduistvan/connectome_gan
+"""
 import click
 # import cv2
 import torch

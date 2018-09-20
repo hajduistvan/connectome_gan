@@ -1,3 +1,7 @@
+"""
+@ author István Hajdu at MTA TTK
+https://github.com/hajduistvan/connectome_gan
+"""
 import yaml
 from addict import Dict
 from ast import literal_eval as make_tuple

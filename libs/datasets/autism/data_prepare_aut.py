@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
 """
-Created on Thu Jul 12 10:31:38 2018
-
-@author: hajduistvan
+@ author István Hajdu at MTA TTK
+https://github.com/hajduistvan/connectome_gan
 """
 
 import numpy as np
