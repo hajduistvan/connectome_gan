@@ -1,7 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="93ee8254-3969-4d3a-97c6-40f0c522fe86" name="Default" comment="" />
+    <list default="true" id="93ee8254-3969-4d3a-97c6-40f0c522fe86" name="Default" comment="">
+      <change afterPath="$PROJECT_DIR$/libs/models/InfoGAN.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/conf_age_regr.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/conf_age_regr.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/hyperparam_search.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/hyperparam_search.xlsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/models/ACWGAN.py" beforeDir="false" afterPath="$PROJECT_DIR$/libs/models/AuxiliaryClassifierWGAN.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/libs/models/WGAN.py" beforeDir="false" afterPath="$PROJECT_DIR$/libs/models/ConditionalWGAN.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/train.py" beforeDir="false" afterPath="$PROJECT_DIR$/train.py" afterDir="false" />
+    </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -23,7 +31,7 @@
     <SUITE FILE_PATH="coverage/connectome_gan$train_age_regr__g_.coverage" NAME="train_age_regr_-g- Coverage Results" MODIFIED="1536825764920" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/connectome_gan$connectome_gan.coverage" NAME="connectome_gan Coverage Results" MODIFIED="1532678892458" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
     <SUITE FILE_PATH="coverage/connectome_gan$train_age_bin__gc.coverage" NAME="train_age_bin_-gc Coverage Results" MODIFIED="1535100426448" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/connectome_gan$train_new_age_regr__g_.coverage" NAME="train_new_age_regr_-g- Coverage Results" MODIFIED="1537447648529" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/connectome_gan$train_new_age_regr__g_.coverage" NAME="train_new_age_regr_-g- Coverage Results" MODIFIED="1537521288299" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/connectome_gan$train_age_regr_c_c.coverage" NAME="train_age_regr_c-c Coverage Results" MODIFIED="1536049398101" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/connectome_gan$train_new_age_regr_c__.coverage" NAME="train_new_age_regr_c-- Coverage Results" MODIFIED="1536918056193" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/connectome_gan$train_age_bin_cgc.coverage" NAME="train_age_bin_cgc Coverage Results" MODIFIED="1535630349445" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
@@ -95,22 +103,22 @@
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
           <entry key="Python Console" value="1328" />
-          <entry key="dummy" value="59" />
-          <entry key="py" value="30644" />
-          <entry key="yaml" value="1190" />
+          <entry key="dummy" value="87" />
+          <entry key="py" value="30786" />
+          <entry key="yaml" value="1207" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="PLAIN_TEXT" value="59" />
-          <entry key="Python" value="31972" />
-          <entry key="YAML" value="1190" />
+          <entry key="PLAIN_TEXT" value="87" />
+          <entry key="Python" value="32114" />
+          <entry key="YAML" value="1207" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
         <counts>
           <entry key="csv" value="27" />
-          <entry key="py" value="121" />
+          <entry key="py" value="123" />
           <entry key="txt" value="7" />
           <entry key="yaml" value="17" />
         </counts>
@@ -119,7 +127,7 @@
         <counts>
           <entry key="CSV" value="26" />
           <entry key="PLAIN_TEXT" value="8" />
-          <entry key="Python" value="121" />
+          <entry key="Python" value="123" />
           <entry key="YAML" value="17" />
         </counts>
       </usages-collector>
@@ -140,8 +148,8 @@
           <file pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/train.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="-969">
-                  <caret line="18" column="33" lean-forward="true" selection-start-line="18" selection-start-column="33" selection-end-line="18" selection-end-column="33" />
+                <state relative-caret-position="663">
+                  <caret line="105" column="28" selection-start-line="105" selection-start-column="28" selection-end-line="105" selection-end-column="28" />
                   <folding>
                     <element signature="e#86#98#0" expanded="true" />
                   </folding>
@@ -150,25 +158,13 @@
             </entry>
           </file>
           <file pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/libs/models/ACWGAN.py">
+            <entry file="file://$PROJECT_DIR$/libs/models/AuxiliaryClassifierWGAN.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="419">
-                  <caret line="195" column="45" selection-start-line="195" selection-start-column="45" selection-end-line="195" selection-end-column="45" />
+                <state relative-caret-position="374">
+                  <caret line="22" column="29" selection-start-line="22" selection-start-column="6" selection-end-line="22" selection-end-column="29" />
                   <folding>
                     <element signature="e#110#122#0" expanded="true" />
-                    <marker date="1537448051367" expanded="true" signature="10198:10207" ph="..." />
-                  </folding>
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/train_loops.py">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="459">
-                  <caret line="27" column="50" selection-start-line="27" selection-start-column="50" selection-end-line="27" selection-end-column="50" />
-                  <folding>
-                    <element signature="e#110#128#0" expanded="true" />
+                    <marker date="1537515932819" expanded="true" signature="10215:10224" ph="..." />
                   </folding>
                 </state>
               </provider>
@@ -177,7 +173,7 @@
           <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/libs/models/convnet.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="195">
+                <state relative-caret-position="385">
                   <caret line="191" selection-start-line="191" selection-end-line="194" selection-end-column="34" />
                   <folding>
                     <marker date="1537445608231" expanded="true" signature="2494:2877" ph="..." />
@@ -206,11 +202,38 @@
       </split-first>
       <split-second>
         <leaf>
-          <file pinned="false" current-in-tab="true">
+          <file pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/config/conf_age_regr.yaml">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="476">
-                  <caret line="61" column="19" selection-start-line="61" selection-start-column="19" selection-end-line="61" selection-end-column="19" />
+                <state relative-caret-position="765">
+                  <caret line="45" column="19" selection-start-line="45" selection-start-column="19" selection-end-line="45" selection-end-column="19" />
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file pinned="false" current-in-tab="true">
+            <entry file="file://$PROJECT_DIR$/libs/models/ConditionalWGAN.py">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="3077">
+                  <caret line="192" column="24" selection-start-line="192" selection-start-column="24" selection-end-line="192" selection-end-column="24" />
+                  <folding>
+                    <marker date="1537515932775" expanded="true" signature="548:5801" ph="..." />
+                    <marker date="1537515932775" expanded="true" signature="1083:1087" ph="..." />
+                    <marker date="1537515932775" expanded="true" signature="1532:1537" ph="..." />
+                    <marker date="1537515932775" expanded="true" signature="2131:2132" ph="..." />
+                    <marker date="1537515932775" expanded="true" signature="7976:8602" ph="..." />
+                    <marker date="1537515932775" expanded="true" signature="9090:9154" ph="..." />
+                    <marker date="1537515932775" expanded="true" signature="16394:17209" ph="..." />
+                  </folding>
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/libs/models/InfoGAN.py">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="238">
+                  <caret line="25" column="10" selection-start-line="25" selection-start-column="10" selection-end-line="25" selection-end-column="10" />
                 </state>
               </provider>
             </entry>
@@ -257,8 +280,8 @@
       <find>add_sc</find>
       <find>add_</find>
       <find>get_dataset</find>
-      <find>denorm</find>
       <find>fake_regr_loss</find>
+      <find>denorm</find>
     </findStrings>
     <replaceStrings>
       <replace>.cuda()</replace>
@@ -308,7 +331,6 @@
         <option value="$PROJECT_DIR$/lib/models/ACGAN.py" />
         <option value="$PROJECT_DIR$/lib/models/ACWGAN.py" />
         <option value="$PROJECT_DIR$/libs/models/convnet.py" />
-        <option value="$PROJECT_DIR$/libs/models/WGAN.py" />
         <option value="$PROJECT_DIR$/train_gan_val.py" />
         <option value="$PROJECT_DIR$/libs/models/wgangp_fns.py" />
         <option value="$PROJECT_DIR$/libs/datasets/__init__.py" />
@@ -318,9 +340,12 @@
         <option value="$PROJECT_DIR$/debug.py" />
         <option value="$PROJECT_DIR$/evaluate.py" />
         <option value="$PROJECT_DIR$/hyperparam_logger.py" />
+        <option value="$PROJECT_DIR$/libs/models/ACWGAN.py" />
+        <option value="$PROJECT_DIR$/libs/models/WGAN.py" />
+        <option value="$PROJECT_DIR$/libs/models/ConditionalWGAN.py" />
+        <option value="$PROJECT_DIR$/libs/models/InfoGAN.py" />
         <option value="$PROJECT_DIR$/train.py" />
         <option value="$PROJECT_DIR$/config/conf_age_regr.yaml" />
-        <option value="$PROJECT_DIR$/libs/models/ACWGAN.py" />
       </list>
     </option>
   </component>
@@ -497,7 +522,7 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/train.py" />
-      <option name="PARAMETERS" value="--config config/conf_age_regr.yaml --mode -g- --run_name run_acgan_1" />
+      <option name="PARAMETERS" value="--config config/conf_age_regr.yaml --mode -g- --run_name run_wgan_2" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
@@ -560,12 +585,12 @@
     <frame x="-8" y="-8" width="1936" height="1176" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.49946865" visible="true" weight="0.15884861" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.49946865" visible="true" weight="0.15884861" />
       <window_info id="Structure" order="1" sideWeight="0.5005314" side_tool="true" weight="0.09322917" />
       <window_info id="Favorites" order="2" sideWeight="0.5005314" side_tool="true" weight="0.09322917" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.12763916" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.36180422" />
+      <window_info anchor="bottom" id="Run" order="2" visible="true" weight="0.13051823" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.39923224" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -767,22 +792,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/libs/models/WGAN.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="34">
-          <caret line="2" column="1" lean-forward="true" selection-start-line="2" selection-start-column="1" selection-end-line="2" selection-end-column="1" />
-          <folding>
-            <marker date="1537445608234" expanded="true" signature="537:5790" ph="..." />
-            <marker date="1537445608234" expanded="true" signature="1072:1076" ph="..." />
-            <marker date="1537445608234" expanded="true" signature="1521:1526" ph="..." />
-            <marker date="1537445608234" expanded="true" signature="2120:2121" ph="..." />
-            <marker date="1537445608234" expanded="true" signature="7965:8591" ph="..." />
-            <marker date="1537445608234" expanded="true" signature="9079:9143" ph="..." />
-            <marker date="1537445608234" expanded="true" signature="16383:17198" ph="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/libs/models/__init__.py">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
@@ -860,13 +869,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/config/conf_age_regr.yaml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="476">
-          <caret line="61" column="19" selection-start-line="61" selection-start-column="19" selection-end-line="61" selection-end-column="19" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/libs/datasets/data_handler.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="158">
@@ -874,19 +876,6 @@
           <folding>
             <element signature="e#87#105#0" expanded="true" />
             <marker date="1537445608229" expanded="true" signature="2672:2681" ph="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/libs/models/convnet.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="195">
-          <caret line="191" selection-start-line="191" selection-end-line="194" selection-end-column="34" />
-          <folding>
-            <marker date="1537445608231" expanded="true" signature="2494:2877" ph="..." />
-            <marker date="1537445608231" expanded="true" signature="2895:3536" ph="..." />
-            <marker date="1537445608231" expanded="true" signature="3555:4815" ph="..." />
-            <marker date="1537445608231" expanded="true" signature="5627:6619" ph="..." />
           </folding>
         </state>
       </provider>
@@ -901,23 +890,66 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/libs/models/ACWGAN.py">
+    <entry file="file://$PROJECT_DIR$/libs/models/InfoGAN.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="419">
-          <caret line="195" column="45" selection-start-line="195" selection-start-column="45" selection-end-line="195" selection-end-column="45" />
+        <state relative-caret-position="238">
+          <caret line="25" column="10" selection-start-line="25" selection-start-column="10" selection-end-line="25" selection-end-column="10" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/libs/models/AuxiliaryClassifierWGAN.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="374">
+          <caret line="22" column="29" selection-start-line="22" selection-start-column="6" selection-end-line="22" selection-end-column="29" />
           <folding>
             <element signature="e#110#122#0" expanded="true" />
-            <marker date="1537448051367" expanded="true" signature="10198:10207" ph="..." />
+            <marker date="1537515932819" expanded="true" signature="10215:10224" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/libs/models/convnet.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="385">
+          <caret line="191" selection-start-line="191" selection-end-line="194" selection-end-column="34" />
+          <folding>
+            <marker date="1537445608231" expanded="true" signature="2494:2877" ph="..." />
+            <marker date="1537445608231" expanded="true" signature="2895:3536" ph="..." />
+            <marker date="1537445608231" expanded="true" signature="3555:4815" ph="..." />
+            <marker date="1537445608231" expanded="true" signature="5627:6619" ph="..." />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/train.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-969">
-          <caret line="18" column="33" lean-forward="true" selection-start-line="18" selection-start-column="33" selection-end-line="18" selection-end-column="33" />
+        <state relative-caret-position="663">
+          <caret line="105" column="28" selection-start-line="105" selection-start-column="28" selection-end-line="105" selection-end-column="28" />
           <folding>
             <element signature="e#86#98#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/config/conf_age_regr.yaml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="765">
+          <caret line="45" column="19" selection-start-line="45" selection-start-column="19" selection-end-line="45" selection-end-column="19" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/libs/models/ConditionalWGAN.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3077">
+          <caret line="192" column="24" selection-start-line="192" selection-start-column="24" selection-end-line="192" selection-end-column="24" />
+          <folding>
+            <marker date="1537515932775" expanded="true" signature="548:5801" ph="..." />
+            <marker date="1537515932775" expanded="true" signature="1083:1087" ph="..." />
+            <marker date="1537515932775" expanded="true" signature="1532:1537" ph="..." />
+            <marker date="1537515932775" expanded="true" signature="2131:2132" ph="..." />
+            <marker date="1537515932775" expanded="true" signature="7976:8602" ph="..." />
+            <marker date="1537515932775" expanded="true" signature="9090:9154" ph="..." />
+            <marker date="1537515932775" expanded="true" signature="16394:17209" ph="..." />
           </folding>
         </state>
       </provider>

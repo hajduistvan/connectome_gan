@@ -7,10 +7,15 @@ import torch
 import yaml
 from addict import Dict
 from libs.datasets import get_dataset
-from libs.models import convnet, WGAN, ACWGAN
+from libs.models import convnet
+from libs.models.ConditionalWGAN import ConditionalWGAN
+from libs.models.AuxiliaryClassifierWGAN import AuxiliaryClassifierWGAN
 from libs.datasets.autism import data_prepare_aut
 from libs.datasets.age import data_prepare_age
 from hyperparam_logger import save_params
+
+
+
 
 @click.command()
 @click.option("-c", "--config", type=str, required=True)
@@ -98,8 +103,7 @@ def main(config, run_name, mode):
 
 
     if mode == '-g-':
-
-        gan = ACWGAN.ACWGAN(config, train_dataset, val_loader)
+        gan = eval(config.GAN_MODEL)(config, train_dataset, val_loader)
         gan.netg.cuda()
         gan.netd.cuda()
         best_val = gan.train()
@@ -162,7 +166,7 @@ def main(config, run_name, mode):
     # if mode[2] == 'c':
     #     print('Extracting gen images\n')
     #     if mode[1] == '-':
-    #         netG = ACWGAN.Generator(
+    #         netG = AuxiliaryClassifierWGAN.Generator(
     #             config.ARCHITECTURE.GAN.DIM,
     #             config.MATR_SIZE,
     #             config.ARCHITECTURE.GAN.NOISE_DIMS

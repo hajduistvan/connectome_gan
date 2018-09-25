@@ -22,7 +22,7 @@ import matplotlib.pyplot as plt
 
 
 
-class WGAN:
+class ConditionalWGAN:
     def __init__(
             self,
             config,

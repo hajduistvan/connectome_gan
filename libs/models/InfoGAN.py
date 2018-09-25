@@ -1,8 +1,9 @@
-# -*- coding: utf-8 -*-
 """
 @author István Hajdu at MTA TTK
 https://github.com/hajduistvan/connectome_gan
 """
+# -*- coding: utf-8 -*-
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -20,7 +21,9 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 
-class ACWGAN:
+
+
+class InfoGAN:
     def __init__(
             self,
             config,
@@ -92,17 +95,13 @@ class ACWGAN:
         if self.global_step % self.config.ITER_TB.GAN == 0:
             self.writer.add_scalar("wasserstein_loss", self.netd.w_loss_meter.value()[0], self.global_step)
             self.writer.add_scalar("discriminator_loss", self.netd.d_loss_meter.value()[0], self.global_step)
-            self.writer.add_scalar("disc_real_critic_loss", self.netd.r_c_loss_meter.value()[0], self.global_step)
-            self.writer.add_scalar("disc_fake_critic_loss", self.netd.f_c_loss_meter.value()[0], self.global_step)
-            self.writer.add_scalar("disc_real_regression_loss", self.netd.d_real_regr_loss_meter.value()[0], self.global_step)
-            self.writer.add_scalar("disc_fake_regression_loss", self.netd.d_fake_regr_loss_meter.value()[0], self.global_step)
+            self.writer.add_scalar("disc_real_loss", self.netd.r_loss_meter.value()[0], self.global_step)
+            self.writer.add_scalar("disc_fake_loss", self.netd.d_loss_meter.value()[0], self.global_step)
             if not self.gan_architecture.LAMBDA_GP == 0:
                 self.writer.add_scalar("gradient_penalty", self.netd.gp_loss_meter.value()[0], self.global_step)
             if not self.gan_architecture.LAMBDA_CT == 0:
                 self.writer.add_scalar("consistency_cost", self.netd.ct_loss_meter.value()[0], self.global_step)
             self.writer.add_scalar("generator_loss", self.netg.g_loss_meter.value()[0], self.global_step)
-            self.writer.add_scalar("generator_critic_loss", self.netg.g_critic_loss_meter.value()[0], self.global_step)
-            self.writer.add_scalar("generator_regression_loss", self.netg.g_pred_loss_meter.value()[0], self.global_step)
         if self.global_step % self.config.ITER_SAVE.GAN == 0:
             os.makedirs(self.save_dir, exist_ok=True)
             # torch.save(
@@ -159,13 +158,8 @@ class Generator(nn.Module):
         self.h = config.MATR_SIZE
         self.noise_dims = self.gan_architecture.NOISE_DIMS
         self.g_loss_meter = MovingAverageValueMeter(5)
-        self.g_critic_loss_meter = MovingAverageValueMeter(5)
-        self.g_pred_loss_meter = MovingAverageValueMeter(5)
         self.log_dir = os.path.join('runs', self.config.DATASET, self.config.run_name, 'gan')
         self.save_dir = os.path.join('save', self.config.DATASET, self.config.run_name, 'gan')
-
-        self.regr_loss_fn = nn.L1Loss()
-
         self.preprocess_data = nn.Sequential(
             nn.Linear(self.noise_dim, 2 * self.dim),
             nn.ReLU(True),
@@ -233,17 +227,15 @@ class Generator(nn.Module):
             self.config.ARCHITECTURE.GAN.NOISE_DIMS
         ).cuda()
         fake = self(noise, fake_labels)
-        self.d_fake_critic, self.d_fake_pred = netd(fake)
-        self.d_fake_critic = self.d_fake_critic.mean()
-        self.fake_regr_loss = self.regr_loss_fn(self.d_fake_pred, fake_labels)
-        self.g_cost = - self.d_fake_critic - self.fake_regr_loss * self.gan_architecture.LAMBDA_REGR
+        G, _ = netd(fake, fake_labels)
+        G = G.mean()
+
+        self.g_cost = -G
         self.g_cost.backward()
         self.optimizer.step()
         self.hook_fn()
 
     def hook_fn(self):
-        self.g_critic_loss_meter.add(self.d_fake_critic.cpu())
-        self.g_pred_loss_meter.add(self.loss_denorm_fn(self.fake_regr_loss.cpu()))
         self.g_loss_meter.add(self.g_cost.detach().cpu())
 
     def get_optimizer(self):
@@ -329,10 +321,7 @@ class Generator(nn.Module):
             plt.axis('off')
         plt.savefig(filename)
         self.train()
-    def loss_denorm_fn(self, x):
-        age_m = make_tuple(self.config.AGE_INTERVAL)[0]
-        age_M = make_tuple(self.config.AGE_INTERVAL)[1]
-        return x * (age_M - age_m)
+
 
 class Discriminator(nn.Module):
     def __init__(self, config):
@@ -349,45 +338,61 @@ class Discriminator(nn.Module):
 
         self.w_loss_meter = MovingAverageValueMeter(5)
         self.d_loss_meter = MovingAverageValueMeter(5)
+        self.r_loss_meter = MovingAverageValueMeter(5)
+        self.f_loss_meter = MovingAverageValueMeter(5)
         self.gp_loss_meter = MovingAverageValueMeter(5)
         self.ct_loss_meter = MovingAverageValueMeter(5)
-        self.d_real_regr_loss_meter = MovingAverageValueMeter(5)
-        self.d_fake_regr_loss_meter = MovingAverageValueMeter(5)
-        self.r_c_loss_meter = MovingAverageValueMeter(5)
-        self.f_c_loss_meter = MovingAverageValueMeter(5)
-        self.regr_loss_fn = nn.L1Loss()
 
-        self.block1 = nn.Sequential(
-            nn.Conv2d(1, 4 * self.dim, (self.h, 1)),
+        self.conv1_data = nn.Sequential(
+            nn.Conv2d(1, 2 * self.dim, (self.h, 1)),
+        )
+
+        self.fc1_labels = nn.Sequential(
+            nn.Linear(1, 2 * self.dim * self.h),
+        )
+        # concat
+        self.bn_relu_dropout_1 = nn.Sequential(
+            # nn.BatchNorm2d(4 * self.dim),
             nn.ReLU(),
             nn.Dropout2d(self.p)
         )
+        self.conv2 = nn.Sequential(
+            nn.Conv2d(4 * self.dim, self.dim, (1, self.h)),
+        )
 
-        self.block2 = nn.Sequential(
-            nn.Conv2d(4 * self.dim, 2 * self.dim, (1, self.h)),
+        self.fc2_labels = nn.Sequential(
+            nn.Linear(1, self.dim),
+        )
+
+        self.bn_relu_dropout_2 = nn.Sequential(
+            # nn.BatchNorm1d(2 * self.dim),
             nn.ReLU(),
             nn.Dropout(self.p)
         )
-
-        self.block3 = nn.Sequential(
+        # concat
+        self.fc = nn.Sequential(
             nn.Linear(2 * self.dim, self.dim),
+            # nn.BatchNorm1d(self.dim),
             nn.ReLU(),
             nn.Dropout(self.p),
         )
-
-        self.critic_output = nn.Linear(self.dim, 1)
-        self.prediction_output = nn.Linear(self.dim, 1)
-
+        self.output = nn.Linear(self.dim, 1)
         self.optimizer = self.get_optimizer()
 
-    def forward(self, x):
-        x = x.view(-1, 1, self.h, self.h)
-        x = self.block1(x)
-        x = self.block2(x)
-        x = self.block3(x.view(-1, 2 * self.dim))
-        out_critic = self.critic_output(x)
-        out_pred = self.prediction_output(x)
-        return out_critic.view(-1), out_pred.view(-1)
+    def forward(self, data, labels):
+        labels = labels.view(-1, 1)
+        output_data = self.conv1_data(data.view(-1, 1, self.h, self.h))
+        output_labels = self.fc1_labels(labels).view(-1, 2 * self.dim, 1, self.h)
+        output = torch.cat([output_data, output_labels], 1)
+        output = self.bn_relu_dropout_1(output)
+        output_data = self.conv2(output)
+        output_labels = self.fc2_labels(labels).view(-1, self.dim, 1, 1)
+        output = torch.cat([output_data, output_labels], 1)
+        output = output.view(-1, 2 * self.dim)
+        output = self.bn_relu_dropout_2(output)
+        output_aux = self.fc(output)
+        output = self.output(output_aux)
+        return output.view(-1), output_aux.view(-1, self.dim)
 
     def init(self):
         for m in self.modules():
@@ -434,10 +439,8 @@ class Discriminator(nn.Module):
 
         self.zero_grad()
 
-        self.d_real_critic, self.d_real_pred = self(real_data)
-        self.d_real_critic = self.d_real_critic.mean()
-
-        self.real_regr_loss = self.regr_loss_fn(self.d_real_pred.view(-1,1), real_labels)
+        self.d_real, _ = self(real_data, real_labels)
+        self.d_real = self.d_real.mean()
 
         # train with fake
         noise = torch.randn(
@@ -447,19 +450,17 @@ class Discriminator(nn.Module):
 
         fake = netg(noise, real_labels).data
 
-        self.d_fake_critic, self.d_fake_pred = self(fake)
-        self.d_fake_critic = self.d_fake_critic.mean()
+        self.d_fake, _ = self(fake, real_labels)
+        self.d_fake = self.d_fake.mean()
 
-        self.fake_regr_loss = self.regr_loss_fn(self.d_fake_pred.view(-1,1), real_labels)
-
-        self.d_cost = self.d_fake_critic - self.d_real_critic \
-                      + self.gan_architecture.LAMBDA_REGR * self.real_regr_loss \
-                      + self.gan_architecture.LAMBDA_REGR * self.fake_regr_loss
+        fake_sq = fake.view(-1, 1, self.h, self.h)
+        self.d_cost = self.d_fake - self.d_real
         # train with gradient penalty
         if not self.lambda_gp == 0:
             self.gradient_penalty = self.calc_gradient_penalty_cond(
                 real_data.data,
-                fake.data
+                real_labels,
+                fake_sq.data
             )
             self.d_cost += self.gradient_penalty * self.lambda_gp
 
@@ -471,7 +472,7 @@ class Discriminator(nn.Module):
             )
             self.d_cost += self.ct_cost * self.lambda_ct
 
-        self.wasserstein_d = self.d_real_critic - self.d_fake_critic
+        self.wasserstein_d = self.d_real - self.d_fake
         self.d_cost.backward()
         self.hook_fn()
         self.optimizer.step()
@@ -480,26 +481,25 @@ class Discriminator(nn.Module):
 
         self.w_loss_meter.add(self.wasserstein_d.detach().cpu())
         self.d_loss_meter.add(self.d_cost.detach().cpu())
-        self.d_real_regr_loss_meter.add(self.loss_denorm_fn(self.fake_regr_loss.detach().cpu()))
-        self.d_fake_regr_loss_meter.add(self.loss_denorm_fn(self.real_regr_loss.detach().cpu()))
-        self.r_c_loss_meter.add(self.d_real_critic.detach().cpu())
-        self.f_c_loss_meter.add(self.d_fake_critic.detach().cpu())
+        self.r_loss_meter.add(self.d_real.detach().cpu())
+        self.f_loss_meter.add(self.d_fake.detach().cpu())
 
         if not self.lambda_gp == 0:
             self.gp_loss_meter.add(self.gradient_penalty.detach().cpu())
         if not self.lambda_ct == 0:
             self.ct_loss_meter.add(self.ct_cost.detach().cpu())
 
-    def calc_gradient_penalty_cond(self, real_data, fake_data):
+    def calc_gradient_penalty_cond(self, real_data, real_labels, fake_data):
         alpha = torch.rand(real_data.size()[0], 1, 1, 1).expand(real_data.size()).cuda()
-        interpolates = alpha * real_data + ((1 - alpha) * fake_data.view(-1, 1, self.h, self.h))
+        interpolates = alpha * real_data + ((1 - alpha) * fake_data)
         interpolates = interpolates.cuda().requires_grad_(True)
 
-        critic_interpolates, regress_interpolates = self(interpolates)
+        real_labels.requires_grad_(True)
+        disc_interpolates, _ = self(interpolates, real_labels)
 
-        gradients = torch.autograd.grad(outputs=[critic_interpolates,regress_interpolates],
-                                        inputs=interpolates,
-                                        grad_outputs=[torch.ones(critic_interpolates.size()).cuda(),torch.ones(regress_interpolates.size()).cuda()],
+        gradients = torch.autograd.grad(outputs=disc_interpolates,
+                                        inputs=[interpolates, real_labels],
+                                        grad_outputs=torch.ones(disc_interpolates.size()).cuda(),
                                         create_graph=True, retain_graph=True, only_inputs=True)[0]
 
         gradient_penalty = ((gradients.norm(2, dim=1) - 1) ** 2).mean()
@@ -511,7 +511,3 @@ class Discriminator(nn.Module):
 
         consistency_term = (d1 - d2).norm(2, dim=0) + 0.1 * (d_1 - d_2).norm(2, dim=1) - self.ct_m
         return consistency_term.mean()
-    def loss_denorm_fn(self, x):
-        age_m = make_tuple(self.config.AGE_INTERVAL)[0]
-        age_M = make_tuple(self.config.AGE_INTERVAL)[1]
-        return x * (age_M - age_m)
