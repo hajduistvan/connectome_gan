@@ -68,3 +68,9 @@ libs/datasets/age/lmu_sald_combined/
 libs/datasets/age/nki_rs_en/
 
 *.npz
+
+runs_old/
+
+run_0\.txt
+
+frozen_inits/

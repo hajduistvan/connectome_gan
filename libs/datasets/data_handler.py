@@ -6,6 +6,7 @@ import numpy as np
 import torch
 from torch.utils import data
 from ast import literal_eval as make_tuple
+import os
 
 
 # TODO: do we even need 2 separate loaders?
@@ -76,6 +77,45 @@ class Age_handler(data.Dataset):
     def __getitem__(self, index):
         image, label = torch.Tensor(self.images[index]), torch.Tensor([self.labels[index]])
         return image.type(torch.float), label.type(torch.float)
+
+    def __len__(self):
+        return len(self.images)
+
+
+class UKBioBankHandler(data.Dataset):
+    def __init__(
+            self,
+            config,
+            number_of_examples = None,
+            split='train',
+            gen_values = None
+    ):
+        self.config = config
+        if gen_values is None:
+            npz_filename = os.path.join(config.DATA_FOLDER, config.DATASET_PART)
+            with np.load(npz_filename) as df:
+                dataset = df[split + '_dataset']
+            self.images = dataset[:number_of_examples, 0]
+            self.labels = dataset[:number_of_examples, 1]
+        else:
+            self.images, self.labels = gen_values
+
+
+
+        self.labels = self._norm_regress_labels()
+
+    def _norm_regress_labels(self):
+        # normalize to range -1,1
+        age_m = make_tuple(self.config.AGE_INTERVAL)[0]
+        age_M = make_tuple(self.config.AGE_INTERVAL)[1]
+        # labels = (self.labels - (age_M - age_m) / 2) / (age_M - age_m)
+        labels = (self.labels - age_m - (age_M - age_m) / 2) / (age_M - age_m) * 2
+        return labels
+
+    def __getitem__(self, index):
+        image, label = torch.Tensor(self.images[index]), torch.Tensor([self.labels[index]])
+        return image.type(torch.float).view(1, self.config.MATR_SIZE, self.config.MATR_SIZE), label.type(
+            torch.float).view(1)
 
     def __len__(self):
         return len(self.images)

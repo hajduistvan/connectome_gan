@@ -141,14 +141,8 @@ def partition_data(CONFIG):
 def read_datasets(CONFIG):
     relative_data_folder = CONFIG.RELATIVE_DATA_FOLDER
     filename = relative_data_folder + CONFIG.DATASET_PART
-    if CONFIG.SUPERVISE_TYPE == 'regress':
-        lab_str = '_regr_labels'
-        train_str = '_r'
-    elif CONFIG.SUPERVISE_TYPE == 'binary':
-        lab_str = '_class_labels'
-        train_str = '_b'
-    else:
-        raise NotImplementedError
+    lab_str = '_regr_labels'
+    train_str = '_r'
     with np.load(filename) as df:
         train_data = df['train_data' + train_str]
         train_labels = df['train' + lab_str + train_str]

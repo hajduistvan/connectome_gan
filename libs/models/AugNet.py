@@ -15,14 +15,13 @@ from torchnet.meter import MovingAverageValueMeter
 from tensorboardX import SummaryWriter
 from libs.datasets import get_dataset
 from libs.models.convnet import ConnectomeConvNet
+from libs.utils.coordconv import CoordConv, CoordConvTranspose, pad_kernel_init
 
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 
-
-
-class ConditionalWGAN:
+class AugNet:
     def __init__(
             self,
             config,
@@ -33,13 +32,25 @@ class ConditionalWGAN:
         self.train_dataset = train_dataset
         self.val_loader = val_loader
 
+        self.h = config.MATR_SIZE
+        self.gan_architecture = self.config.ARCHITECTURE.GAN
+
+        self.dim = self.gan_architecture.DIM
+        self.noise_dims = self.gan_architecture.NOISE_DIMS
+        self.p = self.gan_architecture.DROPOUT
+        self.critic_iters = self.gan_architecture.CRITIC_ITERS
+
         self.netg = Generator(self.config)
         self.netd = Discriminator(self.config)
 
         self.global_step = 0
         self.best_valid_loss = np.inf
+        self.critic_iters = self.config.ARCHITECTURE.GAN.CRITIC_ITERS
+        self.max_iter = self.config.ITER_MAX.GAN
+        if self.config.ARCHITECTURE.GAN.CRITIC_ITER_DECAY:
+            self.critic_iters_milestones = [int(i/self.critic_iters*self.max_iter) for i in range(1, self.critic_iters)]
+        self.log_dir = os.path.join('runs', self.config.DATASET, self.config.RUN_NAME)
 
-        self.log_dir = os.path.join('runs', self.config.DATASET, self.config.run_name)
         self.writer = SummaryWriter(self.log_dir)
 
     def train(self):
@@ -50,10 +61,10 @@ class ConditionalWGAN:
             shuffle=True,
         )
         dataiter = iter(loader)
-        max_iter = self.config.ITER_MAX.GAN
+
         for iteration in tqdm(
-                range(1, max_iter + 1),
-                total=max_iter,
+                range(1, self.max_iter + 1),
+                total=self.max_iter,
                 leave=False,
                 dynamic_ncols=True,
         ):
@@ -62,7 +73,7 @@ class ConditionalWGAN:
             for p in self.netd.parameters():
                 p.requires_grad = True
             # Train critic for N steps
-            for iter_d in range(self.config.ARCHITECTURE.GAN.CRITIC_ITERS):
+            for iter_d in range(self.critic_iters):
                 try:
                     inputs = dataiter.next()
                 except StopIteration:
@@ -79,30 +90,27 @@ class ConditionalWGAN:
         return self.best_valid_loss
 
     def global_hook_fn(self):
-        ### this can go to child
+        self.netg.scheduler.step()
+        self.netd.scheduler.step()
         if self.global_step % self.config.ITER_TB.GAN == 0:
-            self.writer.add_scalar("wasserstein_loss", self.netd.w_loss_meter.value()[0], self.global_step)
-            self.writer.add_scalar("discriminator_loss", self.netd.d_loss_meter.value()[0], self.global_step)
-            self.writer.add_scalar("disc_real_loss", self.netd.r_loss_meter.value()[0], self.global_step)
-            self.writer.add_scalar("disc_fake_loss", self.netd.d_loss_meter.value()[0], self.global_step)
-            if not self.config.ARCHITECTURE.GAN.LAMBDA_GP == 0:
+            self.writer.add_scalar("disc_real_regression_loss", self.netd.d_real_regr_loss_meter.value()[0], self.global_step)
+            self.writer.add_scalar("disc_fake_regression_loss", self.netd.d_fake_regr_loss_meter.value()[0], self.global_step)
+            if not self.gan_architecture.LAMBDA_GP == 0:
                 self.writer.add_scalar("gradient_penalty", self.netd.gp_loss_meter.value()[0], self.global_step)
-            if not self.config.ARCHITECTURE.GAN.LAMBDA_CT == 0:
-                self.writer.add_scalar("consistency_cost", self.netd.ct_loss_meter.value()[0], self.global_step)
-            self.writer.add_scalar("generator_loss", self.netg.g_loss_meter.value()[0], self.global_step)
-        ###
+            self.writer.add_scalar("generator_regression_loss", self.netg.g_regr_loss_meter.value()[0], self.global_step)
         if self.global_step % self.config.ITER_SAVE.GAN == 0:
             os.makedirs(self.log_dir, exist_ok=True)
             self.netg.visualize_gen_images(self.global_step)
         if self.global_step % self.config.ITER_VAL.GAN == 0:
             self.validate()
-
+        if self.config.ARCHITECTURE.GAN.CRITIC_ITER_DECAY and self.global_step in self.critic_iters_milestones:
+            self.critic_iters -= self.config.ARCHITECTURE.GAN.CRITIC_ITER_DECAY
     def validate(self):
-        gen_data = self.netg.generate_training_images(self.config.GEN_IMG_MULT * len(self.train_dataset))
-        df = {'train': gen_data}
+        gen_data = self.netg.generate_training_images(self.config.GEN_IMG_NUM)
+
 
         gen_dataset = get_dataset(self.config.DATASET)(
-            df, config=self.config, split='train')
+            self.config, split='train', gen_values=gen_data)
 
         mixed_dataset = torch.utils.data.ConcatDataset([self.train_dataset, gen_dataset])
         mixed_loader = torch.utils.data.DataLoader(
@@ -138,53 +146,62 @@ class Generator(nn.Module):
         self.noise_dim = self.gan_architecture.NOISE_DIMS
         self.h = config.MATR_SIZE
         self.noise_dims = self.gan_architecture.NOISE_DIMS
+        self.use_coord = make_tuple(self.gan_architecture.COORDCONV_G)
         self.a = float(self.gan_architecture.LRELU_SLOPE)
-        self.g_loss_meter = MovingAverageValueMeter(5)
-        self.log_dir = os.path.join('runs', self.config.DATASET, self.config.run_name, 'gan')
+        self.a = 0
+        self.g_regr_loss_meter = MovingAverageValueMeter(5)
+        self.log_dir = os.path.join('runs', self.config.DATASET, self.config.RUN_NAME, 'gan')
 
-        self.preprocess_data = nn.Sequential(
-            nn.Linear(self.noise_dim, 2 * self.dim),
+        self.regr_loss_fn = nn.L1Loss()
+        # Model
+        self.lab_0 = nn.Sequential(
+            nn.Conv2d(1, self.dim, 1)
+        )
+        self.block0 = nn.Sequential(
+            nn.Conv2d(self.noise_dim, 3 * self.dim, 1),
+        )
+
+        self.block_lab_0 = nn.Sequential(
+            nn.BatchNorm2d(self.dim * 4),
             nn.LeakyReLU(negative_slope=self.a, inplace=True),
         )
-        self.fc1_labels = nn.Sequential(
-            nn.Linear(1, 2 * self.dim),
-            nn.LeakyReLU(negative_slope=self.a, inplace=True),
-        )
-        # concat, reshape
+
         self.block1 = nn.Sequential(
             nn.ConvTranspose2d(4 * self.dim, 2 * self.dim, (1, self.h)),
-        )
-
-        self.fc2_labels = nn.Sequential(
-            nn.Linear(1, 2 * self.dim * self.h),
-        )  # + reshape
-
-        # concat
-        self.bn_relu = nn.Sequential(
-            nn.BatchNorm2d(4 * self.dim),
+            nn.BatchNorm2d(self.dim * 2),
             nn.LeakyReLU(negative_slope=self.a, inplace=True),
-
         )
         self.block2 = nn.Sequential(
-            nn.ConvTranspose2d(4 * self.dim, 1, (self.h, 1)),  # 2.nd arg DIM
+            CoordConvTranspose(2 * self.dim, self.dim, use_coord=self.use_coord[0], kernel_size=(self.h, 1)),  # 2.nd arg DIM
+            nn.BatchNorm2d(self.dim),
+            nn.LeakyReLU(negative_slope=self.a, inplace=True),
+        )
+        self.block3 = nn.Sequential(
+            CoordConv(self.dim, 1, use_coord=self.use_coord[1], kernel_size=1),
+            nn.BatchNorm2d(1),
         )
         self.sigmoid = nn.Tanh()
+
+        ###
+
         self.optimizer = self.get_optimizer()
+        milestones = [self.config.ITER_MAX.GAN // 10 * s for s in range(10)]
+        self.scheduler = torch.optim.lr_scheduler.MultiStepLR(self.optimizer, milestones=milestones,
+                                                              gamma=self.config.OPTIMIZER.GAN.G.POWER)
+
         self.init_weights()
 
-    def forward(self, data, labels):
-        labels = labels.view(-1, 1)
-        output_data = self.preprocess_data(data)
-        output_labels = self.fc1_labels(labels)
-        output = torch.cat([output_data, output_labels], 1).view(-1, 4 * self.dim, 1, 1)
-        output_data = self.block1(output)
-        output_labels = self.fc2_labels(labels).view(-1, 2 * self.dim, 1, self.h)
-        output = torch.cat([output_data, output_labels], 1)
-        output = self.bn_relu(output)
-        output = self.block2(output)
-        output = self.sigmoid(output)
-        output = (output + torch.transpose(output, -1, -2)) / 2
-        return output.view(-1, self.h * self.h)
+    def forward(self, x, labels):
+        x = x.view(-1, self.noise_dim, 1, 1)
+        labels = labels.view(-1, 1, 1, 1)
+        x = torch.cat([self.block0(x), self.lab_0(labels)], 1)
+        x = self.block_lab_0(x)
+        x = self.block1(x)
+        x = self.block2(x)
+        x = self.block3(x)
+        x = self.sigmoid(x)
+        x = (x+torch.transpose(x, -1, -2))/2
+        return x.view(-1, self.h, self.h)
 
     def init_weights(self):
         for m in self.modules():
@@ -192,14 +209,17 @@ class Generator(nn.Module):
                 torch.nn.init.kaiming_normal_(m.weight, a=self.a, nonlinearity='leaky_relu')
                 if not m.bias is None:
                     torch.nn.init.constant_(m.bias, 0)
-            elif isinstance(m, nn.BatchNorm2d):
-                torch.nn.init.constant_(m.weight, 1)
-                torch.nn.init.constant_(m.bias, 0)
-            elif isinstance(m, nn.Linear):
+            elif isinstance(m, nn.Conv2d):
                 torch.nn.init.kaiming_normal_(m.weight, a=self.a, nonlinearity='leaky_relu')
                 if not m.bias is None:
                     torch.nn.init.constant_(m.bias, 0)
-
+            elif isinstance(m, CoordConvTranspose):
+                torch.nn.init.kaiming_normal_(m.conv.weight, a=self.a, nonlinearity='leaky_relu')
+                if not m.conv.bias is None:
+                    torch.nn.init.constant_(m.conv.bias, 0)
+            elif isinstance(m, nn.BatchNorm2d):
+                torch.nn.init.constant_(m.weight, 1)
+                torch.nn.init.constant_(m.bias, 0)
     def train_step(self, netd):
         self.zero_grad()
 
@@ -210,16 +230,14 @@ class Generator(nn.Module):
             self.config.ARCHITECTURE.GAN.NOISE_DIMS
         ).cuda()
         fake = self(noise, fake_labels)
-        G, _ = netd(fake, fake_labels)
-        G = G.mean()
-
-        self.g_cost = -G
-        self.g_cost.backward()
+        self.d_fake_regr = netd(fake)
+        self.fake_regr_loss = self.regr_loss_fn(self.d_fake_regr, fake_labels)
+        self.fake_regr_loss.backward()
         self.optimizer.step()
         self.hook_fn()
 
     def hook_fn(self):
-        self.g_loss_meter.add(self.g_cost.detach().cpu())
+        self.g_regr_loss_meter.add(self.loss_denorm_fn(self.fake_regr_loss.detach().cpu()))
 
     def get_optimizer(self):
         optimizer = {
@@ -228,17 +246,6 @@ class Generator(nn.Module):
                 lr=float(self.config.OPTIMIZER.GAN.G.LR_ADAM),
                 betas=make_tuple(self.config.OPTIMIZER.GAN.G.BETAS),
             ),
-            # "sgd": torch.optim.SGD(  # Do not use!
-            #     self.parameters(),
-            #     lr=float(self.config.OPTIMIZER.GAN.G.LR_SGD),
-            #     momentum=self.config.OPTIMIZER.GAN.G.MOMENTUM,
-            #     nesterov=False,
-            # ),
-            # "rmsprop": torch.optim.RMSprop(
-            #     self.parameters(),
-            #     lr=float(self.config.OPTIMIZER.GAN.G.LR_RMS),
-            #     momentum=self.config.OPTIMIZER.GAN.G.MOMENTUM,
-            # ),
         }[self.config.OPTIMIZER.GAN.G.ALG]
         return optimizer
 
@@ -254,7 +261,7 @@ class Generator(nn.Module):
         age_m = make_tuple(self.config.AGE_INTERVAL)[0]
         age_M = make_tuple(self.config.AGE_INTERVAL)[1]
         normed_labels = (torch.rand(num_images) * 2 - 1).cuda()
-        labels = age_m + (normed_labels + 1)/2 * (age_M - age_m)
+        labels = (age_m + (normed_labels + 1) / 2 * (age_M - age_m))
         images = np.empty((num_images, 1, self.h, self.h)).astype(np.float32)
         # for i in tqdm(
         #         range(0, num_images // b),
@@ -282,7 +289,7 @@ class Generator(nn.Module):
         lab1 = (age_m + torch.rand(num_images // 2) * (55 - age_m)).type(torch.int)
         lab2 = (55 + torch.rand(num_images // 2) * (age_M - 55)).type(torch.int)
         labels = torch.cat([lab1, lab2], 0).type(torch.float).cuda().requires_grad_(False)
-        samples = self(noise, (labels - age_m-(age_M - age_m) / 2) / (age_M - age_m)*2)
+        samples = self(noise, (labels - (age_M - age_m) / 2) / (age_M - age_m))
         samples = samples.view(num_images, 1, h, h)
 
         i = str(global_step)
@@ -299,7 +306,10 @@ class Generator(nn.Module):
             plt.axis('off')
         plt.savefig(filename)
         self.train()
-
+    def loss_denorm_fn(self, x):
+        age_m = make_tuple(self.config.AGE_INTERVAL)[0]
+        age_M = make_tuple(self.config.AGE_INTERVAL)[1]
+        return x * (age_M - age_m)
 
 class Discriminator(nn.Module):
     def __init__(self, config):
@@ -311,67 +321,61 @@ class Discriminator(nn.Module):
         self.h = config.MATR_SIZE
         self.p = self.gan_architecture.DROPOUT
         self.lambda_gp = self.gan_architecture.LAMBDA_GP
-        self.lambda_ct = self.gan_architecture.LAMBDA_CT
-        self.ct_m = self.gan_architecture.CT_M
         self.a = float(self.gan_architecture.LRELU_SLOPE)
-        self.w_loss_meter = MovingAverageValueMeter(5)
+        self.use_coord = make_tuple(self.gan_architecture.COORDCONV_G)
+
         self.d_loss_meter = MovingAverageValueMeter(5)
-        self.r_loss_meter = MovingAverageValueMeter(5)
-        self.f_loss_meter = MovingAverageValueMeter(5)
         self.gp_loss_meter = MovingAverageValueMeter(5)
-        self.ct_loss_meter = MovingAverageValueMeter(5)
+        self.d_real_regr_loss_meter = MovingAverageValueMeter(5)
+        self.d_fake_regr_loss_meter = MovingAverageValueMeter(5)
+        self.regr_loss_fn = nn.L1Loss()
 
-        self.conv1_data = nn.Sequential(
-            nn.Conv2d(1, 2 * self.dim, (self.h, 1)),
-        )
-
-        self.fc1_labels = nn.Sequential(
-            nn.Linear(1, 2 * self.dim * self.h),
-        )
-        # concat
-        self.bn_relu_dropout_1 = nn.Sequential(
+        self.block0 = nn.Sequential(
+            CoordConv(1, 8 * self.dim, use_coord=self.use_coord[0], kernel_size=(self.h, 1)),
             # nn.BatchNorm2d(4 * self.dim),
             nn.LeakyReLU(negative_slope=self.a),
-            nn.Dropout2d(self.p)
-        )
-        self.conv2 = nn.Sequential(
-            nn.Conv2d(4 * self.dim, self.dim, (1, self.h)),
+            # nn.Dropout2d(self.p)
         )
 
-        self.fc2_labels = nn.Sequential(
-            nn.Linear(1, self.dim),
-        )
-
-        self.bn_relu_dropout_2 = nn.Sequential(
-            # nn.BatchNorm1d(2 * self.dim),
+        self.block1 = nn.Sequential(
+            CoordConv(8 * self.dim, 4 * self.dim, use_coord=self.use_coord[1], kernel_size=(1, self.h)),
+            # nn.BatchNorm2d(2 * self.dim),
             nn.LeakyReLU(negative_slope=self.a),
-            nn.Dropout(self.p)
+            # nn.Dropout2d(self.p)
         )
-        # concat
-        self.fc = nn.Sequential(
+        self.block2 = nn.Sequential(
+            nn.Conv2d(4 * self.dim, 2 * self.dim, 1),
+            # nn.BatchNorm2d(self.dim),
+            nn.LeakyReLU(negative_slope=self.a),
+            # nn.Dropout2d(self.p),
+        )
+        self.last_common = nn.Sequential(
+            nn.Linear(2 * self.dim, 2 * self.dim),
+            nn.LeakyReLU(negative_slope=self.a),
+        )
+        self.regr_fc = nn.Sequential(
             nn.Linear(2 * self.dim, self.dim),
-            # nn.BatchNorm1d(self.dim),
             nn.LeakyReLU(negative_slope=self.a),
-            nn.Dropout(self.p),
         )
-        self.output = nn.Linear(self.dim, 1)
+        self.prediction_output = nn.Linear(self.dim, 1)
+
         self.optimizer = self.get_optimizer()
+        milestones = [self.config.ITER_MAX.GAN // 10 * s for s in range(10)]
+        self.scheduler = torch.optim.lr_scheduler.MultiStepLR(self.optimizer, milestones=milestones,
+                                                              gamma=self.config.OPTIMIZER.GAN.D.POWER)
+
+
         self.init_weights()
 
-    def forward(self, data, labels):
-        labels = labels.view(-1, 1)
-        x_data = self.conv1_data(data.view(-1, 1, self.h, self.h))
-        x_labels = self.fc1_labels(labels).view(-1, 2 * self.dim, 1, self.h)
-        x = torch.cat([x_data, x_labels], 1)
-        x = self.bn_relu_dropout_1(x)
-        x_data = self.conv2(x)
-        x_labels = self.fc2_labels(labels).view(-1, self.dim, 1, 1)
-        x = torch.cat([x_data, x_labels], 1)
+    def forward(self, x):
+        x = self.block0(x.view(-1, 1, self.h, self.h))
+        x = self.block1(x)
+        x = self.block2(x)
         x = x.view(-1, 2 * self.dim)
-        x = self.bn_relu_dropout_2(x)
-        x_aux = self.fc(x)
-        x = self.output(x)
-        return x.view(-1), x_aux.view(-1)
+        x = self.last_common(x)
+        x_regr = self.regr_fc(x)
+        x_pred = self.prediction_output(x_regr)
+        return x_pred.view(-1)
 
     def init_weights(self):
         for m in self.modules():
@@ -390,6 +394,7 @@ class Discriminator(nn.Module):
                 if not m.bias is None:
                     torch.nn.init.constant_(m.bias, 0)
 
+
     def get_optimizer(self):
         optimizer = {
             "adam": torch.optim.Adam(
@@ -407,8 +412,9 @@ class Discriminator(nn.Module):
 
         self.zero_grad()
 
-        self.d_real, _ = self(real_data, real_labels)
-        self.d_real = self.d_real.mean()
+        self.d_real_pred = self(real_data)
+
+        self.real_regr_loss = self.regr_loss_fn(self.d_real_pred.view(-1,1), real_labels)
 
         # train with fake
         noise = torch.randn(
@@ -418,58 +424,49 @@ class Discriminator(nn.Module):
 
         fake = netg(noise, real_labels).data
 
-        self.d_fake, _ = self(fake, real_labels)
-        self.d_fake = self.d_fake.mean()
+        self.d_fake_pred = self(fake)
+        self.fake_regr_loss = self.regr_loss_fn(self.d_fake_pred.view(-1,1), real_labels)
 
-        fake_sq = fake.view(-1, 1, self.h, self.h)
-        self.d_cost = self.d_fake - self.d_real
-        # train with gradient penalty
+        self.d_cost = self.real_regr_loss
         if not self.lambda_gp == 0:
             self.gradient_penalty = self.calc_gradient_penalty_cond(
                 real_data.data,
-                real_labels,
-                fake_sq.data
+                fake.data
             )
             self.d_cost += self.gradient_penalty * self.lambda_gp
 
-        # consistency_cost
-        if not self.lambda_ct == 0:
-            self.ct_cost = self.calc_consistency_penalty(
-                real_data.data,
-                real_labels,
-            )
-            self.d_cost += self.ct_cost * self.lambda_ct
 
-        self.wasserstein_d = self.d_real - self.d_fake
         self.d_cost.backward()
         self.hook_fn()
         self.optimizer.step()
 
     def hook_fn(self):
 
-        self.w_loss_meter.add(self.wasserstein_d.detach().cpu())
         self.d_loss_meter.add(self.d_cost.detach().cpu())
-        self.r_loss_meter.add(self.d_real.detach().cpu())
-        self.f_loss_meter.add(self.d_fake.detach().cpu())
+        self.d_real_regr_loss_meter.add(self.loss_denorm_fn(self.real_regr_loss.detach().cpu()))
+        self.d_fake_regr_loss_meter.add(self.loss_denorm_fn(self.fake_regr_loss.detach().cpu()))
 
         if not self.lambda_gp == 0:
             self.gp_loss_meter.add(self.gradient_penalty.detach().cpu())
-        if not self.lambda_ct == 0:
-            self.ct_loss_meter.add(self.ct_cost.detach().cpu())
 
-    def calc_gradient_penalty_cond(self, real_data, real_labels, fake_data):
+    def calc_gradient_penalty_cond(self, real_data, fake_data):
         alpha = torch.rand(real_data.size()[0], 1, 1, 1).expand(real_data.size()).cuda()
-        interpolates = alpha * real_data + ((1 - alpha) * fake_data)
+        interpolates = alpha * real_data + ((1 - alpha) * fake_data.view(-1, 1, self.h, self.h))
         interpolates = interpolates.cuda().requires_grad_(True)
 
-        real_labels.requires_grad_(True)
-        disc_interpolates, _ = self(interpolates, real_labels)
+        regress_interpolates = self(interpolates)
 
-        gradients = torch.autograd.grad(outputs=disc_interpolates,
-                                        inputs=[interpolates, real_labels],
-                                        grad_outputs=torch.ones(disc_interpolates.size()).cuda(),
+        gradients = torch.autograd.grad(outputs=[regress_interpolates],
+                                        inputs=interpolates,
+                                        grad_outputs=[torch.ones(regress_interpolates.size()).cuda()],
                                         create_graph=True, retain_graph=True, only_inputs=True)[0]
 
         gradient_penalty = ((gradients.norm(2, dim=1) - 1) ** 2).mean()
         return gradient_penalty
 
+    def loss_denorm_fn(self, x):
+        age_m = make_tuple(self.config.AGE_INTERVAL)[0]
+        age_M = make_tuple(self.config.AGE_INTERVAL)[1]
+        if isinstance(self.regr_loss_fn, nn.MSELoss):
+            x = torch.sqrt(x)
+        return x * (age_M - age_m)

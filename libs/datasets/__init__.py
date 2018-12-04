@@ -2,6 +2,6 @@
 @ author István Hajdu at MTA TTK
 https://github.com/hajduistvan/connectome_gan
 """
-from .data_handler import Autism_handler, Age_handler
+from .data_handler import Autism_handler, Age_handler, UKBioBankHandler
 def get_dataset(name):
-    return {"autism": Autism_handler, "age_small": Age_handler}[name]
+    return {"autism": Autism_handler, "age_small": Age_handler, "biobank": UKBioBankHandler}[name]

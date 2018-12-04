@@ -24,7 +24,9 @@ def get_excel_col_idx(i):
     if i <= len(letters):
         return letters[i - 1]
     else:
-        raise NotImplementedError
+        let1 = letters[(i-1) // len(letters)-1]
+        let2 = letters[i%len(letters)-1]
+        return let1+let2
 
 
 excluded_keys = [
@@ -53,8 +55,8 @@ def save_params(CONFIG, result_dict):
     xls_filename = os.path.join(os.getcwd(), 'hyperparam_search.xlsx')
     param_dict = append_elements(CONFIG, {}, excluded_keys, '')
 
-    sheet_name = param_dict['DATASET'] + '_' + param_dict['SUPERVISE_TYPE']
-    write_exclude_keys = ['DATASET', 'SUPERVISE_TYPE']
+    sheet_name = param_dict['DATASET']
+    write_exclude_keys = ['DATASET']
     if os.path.isfile(xls_filename):
         wb = openpyxl.load_workbook(xls_filename)
     else:
@@ -99,7 +101,7 @@ def save_params(CONFIG, result_dict):
             val = ""
         else:
             val = {**result_dict, **param_dict}[key]
-            if not type(val) == str and not val is None and val % 1:
+            if not type(val) == str and not type(val) is list and not val is None and val % 1:
                 val = val - val % 0.001
         ws[col_letter + str(i + 1)] = val
     wb.save(xls_filename)

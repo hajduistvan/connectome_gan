@@ -4,7 +4,6 @@
 https://github.com/hajduistvan/connectome_gan
 """
 import torch.nn as nn
-import torch.nn.functional as F
 import torch
 from ast import literal_eval as make_tuple
 import os
@@ -12,6 +11,7 @@ from torchnet.meter import MovingAverageValueMeter
 from tensorboardX import SummaryWriter
 from tqdm import tqdm
 import numpy as np
+from libs.utils.coordconv import CoordConv, pad_kernel_init
 
 
 class ConnectomeConvNet(nn.Module):
@@ -19,22 +19,27 @@ class ConnectomeConvNet(nn.Module):
     def __init__(
             self,
             config,
-            mix,
             val_loader,
+            exp_name,
             gan_best_valid_loss=np.inf,
             rnd_init=False,
+
     ):
         super(ConnectomeConvNet, self).__init__()
         self.config = config
         self.class_architecture = self.config.ARCHITECTURE.CLASS
-        self.mix = mix
+        self.exp_name = exp_name
         self.val_loader = val_loader
-        self.set_dirs()
+
+        dataset_name = self.config.DATASET
+        self.log_dir = os.path.join('runs', dataset_name, self.config.RUN_NAME)
+        os.makedirs(self.log_dir, exist_ok=True)
         self.h = self.config.MATR_SIZE
         self.rnd_init = rnd_init
         self.chs = make_tuple(self.class_architecture.CHS)
         self.neurons = make_tuple(self.class_architecture.NEURONS)
         self.p = self.class_architecture.DROPOUT
+        self.coord_convs = make_tuple(self.class_architecture.COORDCONV)
         self.best_valid_loss = np.inf
         self.gan_best_valid_loss = gan_best_valid_loss
         self.criterion, self.criterion_to_log = self.get_loss_fn()
@@ -42,13 +47,15 @@ class ConnectomeConvNet(nn.Module):
         self.writer = SummaryWriter(self.log_dir)
 
         self.block1 = nn.Sequential(
-            nn.Conv2d(1, self.chs[0], (self.h, 1)),
+            # CoordConv(1, self.chs[0], use_coord=self.coord_convs[0], kernel_size=(self.h, 1)),
+            nn.Conv2d(1,self.chs[0], kernel_size=(self.h, 1)),
             nn.BatchNorm2d(self.chs[0]),
             nn.ReLU(),
             nn.Dropout2d(self.p),
         )
         self.block2 = nn.Sequential(
-            nn.Conv2d(self.chs[0], self.chs[1], (1, self.h)),
+            # CoordConv(self.chs[0], self.chs[1], use_coord=self.coord_convs[1], kernel_size=(1, self.h)),
+            nn.Conv2d(self.chs[0], self.chs[1], kernel_size=(1,self.h)),
             nn.BatchNorm2d(self.chs[1]),
             nn.ReLU(),
             nn.Dropout2d(self.p),
@@ -69,10 +76,15 @@ class ConnectomeConvNet(nn.Module):
             nn.Linear(self.neurons[1], self.neurons[2]),
         )
         self.optimizer = self.get_optimizer()
+        milestones = [self.config.ITER_MAX.CLASS // 10 * s for s in range(10)]
+        self.scheduler = torch.optim.lr_scheduler.MultiStepLR(self.optimizer, milestones=milestones,
+                                                              gamma=self.config.OPTIMIZER.CLASS.POWER)
+
         self.initialize_weights()
 
     def forward(self, x):
-        x = self.block1(x)
+
+        x = self.block1(x)#.view(-1,1,self.h,self.h))
         x = self.block2(x)
         x = x.view(-1, self.chs[1])
         x = self.block3(x)
@@ -81,6 +93,7 @@ class ConnectomeConvNet(nn.Module):
         return x
 
     def train_step(self, inputs):
+        self.scheduler.step()
         data, labels = inputs
         data = data.cuda()
         labels = labels.view(-1, 1).cuda()
@@ -95,14 +108,8 @@ class ConnectomeConvNet(nn.Module):
 
     def hook_fn(self):
         self.train_loss_meter.add(self.loss_denorm_fn(self.loss_log))
-        if not self.mix and self.global_step % self.config.ITER_TB.CLASS == 0:
+        if self.global_step % self.config.ITER_TB.CLASS == 0:
             self.writer.add_scalar("classifier_training_loss", self.train_loss_meter.value()[0], self.global_step)
-        if not self.mix and self.global_step % self.config.ITER_SAVE.CLASS == 0:
-            torch.save(
-                self.state_dict(),
-                os.path.join(self.save_dir,
-                             "checkpoint_class_{}.pth".format(self.global_step)),
-            )
         if self.global_step % self.config.ITER_VAL.CLASS == 0:
             self.validate()
 
@@ -117,19 +124,17 @@ class ConnectomeConvNet(nn.Module):
                 labels = labels.type(torch.FloatTensor).view(-1, 1)
                 data, labels = data.cuda(), labels.cuda()
                 out = self(data)
-
                 loss = self.loss_denorm_fn(self.criterion_to_log(out, labels).type(torch.float).cuda().detach())
                 valid_loss_l += loss * batch_len
                 b += batch_len
             valid_loss = (valid_loss_l / b).type(torch.float).cpu().numpy()[0]
-            if not self.mix:
-                self.writer.add_scalar("classifier_validation_loss", valid_loss, self.global_step)
+            self.writer.add_scalar("classifier_validation_loss", valid_loss, self.global_step)
 
             if valid_loss < self.gan_best_valid_loss:
                 torch.save(
                     self.state_dict(),
-                    os.path.join(self.save_dir,
-                                 "checkpoint_best_class_loss.pth"),
+                    os.path.join(self.log_dir,
+                                 "checkpoint_best_class_"+self.exp_name+".pth"),
                 )
                 self.gan_best_valid_loss = valid_loss
             if valid_loss < self.best_valid_loss:
@@ -141,13 +146,13 @@ class ConnectomeConvNet(nn.Module):
         trainiter = iter(loader)
         self.train_loss_meter = MovingAverageValueMeter(5)
         self.val_loss_meter = MovingAverageValueMeter(5)
-        # for iteration in tqdm(
-        #         range(1, self.config.ITER_MAX.CLASS + 1),
-        #         total=self.config.ITER_MAX.CLASS,
-        #         leave=False,
-        #         dynamic_ncols=True,
-        # ):
-        for iteration in range(1,self.config.ITER_MAX.CLASS):
+        for iteration in tqdm(
+                range(1, self.config.ITER_MAX.CLASS + 1),
+                total=self.config.ITER_MAX.CLASS,
+                leave=False,
+                dynamic_ncols=True,
+        ):
+            # for iteration in range(1,self.config.ITER_MAX.CLASS):
             self.global_step = iteration
             try:
                 inputs = trainiter.next()
@@ -165,6 +170,12 @@ class ConnectomeConvNet(nn.Module):
                     torch.nn.init.kaiming_normal_(m.weight, nonlinearity='relu')
                     if not m.bias is None:
                         torch.nn.init.constant_(m.bias, 0)
+                elif isinstance(m, CoordConv):
+                    # torch.nn.init.kaiming_normal_(m.conv.weight, nonlinearity='relu')
+                    torch.nn.init.normal_(m.conv.weight)
+                    if not m.conv.bias is None:
+                        torch.nn.init.constant_(m.conv.bias, 0)
+                    # m.conv.weight[:, -2:, :, :] = 1e-10
                 elif isinstance(m, nn.BatchNorm2d):
                     torch.nn.init.constant_(m.weight, 1)
                     torch.nn.init.constant_(m.bias, 0)
@@ -176,8 +187,15 @@ class ConnectomeConvNet(nn.Module):
                     if not m.bias is None:
                         torch.nn.init.constant_(m.bias, 0)
         else:
-            path = self.config.CLASS_FROZEN_INIT_FILENAME
-            self.load_state_dict(torch.load(path), strict=False)
+            path = os.path.join('frozen_inits',self.config.CLASS_FROZEN_INIT_FILENAME)
+            state_dict = torch.load(path)
+            # print(list(state_dict.keys()))
+            #
+            # if self.coord_convs[0]:
+            #     state_dict['block1.0.conv.weight'] = pad_kernel_init(state_dict['block1.0.conv.weight'])
+            # if self.coord_convs[1]:
+            #     state_dict['block2.0.conv.weight'] = pad_kernel_init(state_dict['block2.0.conv.weight'])
+            self.load_state_dict(state_dict, strict=False)
 
     def get_optimizer(self):
         optimizer = {
@@ -185,6 +203,7 @@ class ConnectomeConvNet(nn.Module):
                 self.parameters(),
                 lr=float(self.config.OPTIMIZER.CLASS.LR_ADAM),
                 betas=make_tuple(self.config.OPTIMIZER.CLASS.BETAS),
+                weight_decay=float(self.config.OPTIMIZER.CLASS.WD)
             )
         }[self.config.OPTIMIZER.CLASS.ALG]
         return optimizer
@@ -192,7 +211,7 @@ class ConnectomeConvNet(nn.Module):
     def loss_denorm_fn(self, x):
         age_m = make_tuple(self.config.AGE_INTERVAL)[0]
         age_M = make_tuple(self.config.AGE_INTERVAL)[1]
-        return x * (age_M - age_m)
+        return x * (age_M - age_m) / 2
 
     def get_loss_fn(self):
 
@@ -208,12 +227,24 @@ class ConnectomeConvNet(nn.Module):
 
         return criterion, criterion_to_log
 
-    def set_dirs(self):
-        dataset_name = self.config.DATASET
-        if self.mix:
-            self.save_dir = os.path.join('save', dataset_name, self.config.run_name, 'mixed')
-            self.log_dir = os.path.join('runs', dataset_name, self.config.run_name, 'mixed')
-        else:
-            self.save_dir = os.path.join('save', dataset_name, self.config.run_name, 'pure')
-            self.log_dir = os.path.join('runs', dataset_name, self.config.run_name, 'pure')
-        os.makedirs(self.save_dir, exist_ok=True)
+    def evaluate(self, test_loader, path=None):
+        if path is None:
+            path = os.path.join(self.log_dir, "checkpoint_best_class_"+self.exp_name+".pth")
+        self.eval()
+        self.load_state_dict(torch.load(path))
+        l, b = 0, 0
+        for i, datapair in enumerate(test_loader):
+            with torch.no_grad():
+                data, labels = datapair
+                batch_len = data.shape[0]
+                data = data.cuda()
+                labels = labels.type(torch.FloatTensor).view(-1, 1).cuda()
+                output = self(data)
+                loss = self.criterion_to_log(output, labels)
+                ll = loss.detach().cpu().numpy()
+                l += ll * batch_len
+                b += batch_len
+        testloss = self.loss_denorm_fn(l / b)
+        self.writer.add_scalar('test_loss', testloss)
+        # print('Test loss: ', testloss)
+        return testloss

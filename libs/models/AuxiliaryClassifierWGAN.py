@@ -15,6 +15,7 @@ from torchnet.meter import MovingAverageValueMeter
 from tensorboardX import SummaryWriter
 from libs.datasets import get_dataset
 from libs.models.convnet import ConnectomeConvNet
+from libs.utils.coordconv import CoordConv, CoordConvTranspose, pad_kernel_init
 
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
@@ -42,14 +43,14 @@ class AuxiliaryClassifierWGAN:
         self.netg = Generator(self.config)
         self.netd = Discriminator(self.config)
 
-        self.netd.init()
-        self.netg.init()
-
         self.global_step = 0
         self.best_valid_loss = np.inf
+        self.critic_iters = self.config.ARCHITECTURE.GAN.CRITIC_ITERS
+        self.max_iter = self.config.ITER_MAX.GAN
+        if self.config.ARCHITECTURE.GAN.CRITIC_ITER_DECAY:
+            self.critic_iters_milestones = [int(i/self.critic_iters*self.max_iter) for i in range(1, self.critic_iters)]
+        self.log_dir = os.path.join('runs', self.config.DATASET, self.config.RUN_NAME)
 
-        self.log_dir = os.path.join('runs', self.config.DATASET, self.config.run_name, 'gan')
-        self.save_dir = os.path.join('save', self.config.DATASET, self.config.run_name, 'gan')
         self.writer = SummaryWriter(self.log_dir)
 
     def train(self):
@@ -60,10 +61,10 @@ class AuxiliaryClassifierWGAN:
             shuffle=True,
         )
         dataiter = iter(loader)
-        max_iter = self.config.ITER_MAX.GAN
+
         for iteration in tqdm(
-                range(1, max_iter + 1),
-                total=max_iter,
+                range(1, self.max_iter + 1),
+                total=self.max_iter,
                 leave=False,
                 dynamic_ncols=True,
         ):
@@ -89,9 +90,11 @@ class AuxiliaryClassifierWGAN:
         return self.best_valid_loss
 
     def global_hook_fn(self):
+        self.netg.scheduler.step()
+        self.netd.scheduler.step()
         if self.global_step % self.config.ITER_TB.GAN == 0:
-            self.writer.add_scalar("wasserstein_loss", self.netd.w_loss_meter.value()[0], self.global_step)
             self.writer.add_scalar("discriminator_loss", self.netd.d_loss_meter.value()[0], self.global_step)
+            self.writer.add_scalar("wasserstein_loss", self.netd.w_loss_meter.value()[0], self.global_step)
             self.writer.add_scalar("disc_real_critic_loss", self.netd.r_c_loss_meter.value()[0], self.global_step)
             self.writer.add_scalar("disc_fake_critic_loss", self.netd.f_c_loss_meter.value()[0], self.global_step)
             self.writer.add_scalar("disc_real_regression_loss", self.netd.d_real_regr_loss_meter.value()[0], self.global_step)
@@ -104,25 +107,18 @@ class AuxiliaryClassifierWGAN:
             self.writer.add_scalar("generator_critic_loss", self.netg.g_critic_loss_meter.value()[0], self.global_step)
             self.writer.add_scalar("generator_regression_loss", self.netg.g_pred_loss_meter.value()[0], self.global_step)
         if self.global_step % self.config.ITER_SAVE.GAN == 0:
-            os.makedirs(self.save_dir, exist_ok=True)
-            # torch.save(
-            #     self.netd.state_dict(),
-            #     os.path.join(self.config.SAVE_DIR.GAN, "checkpoint_disc_{}.pth".format(self.global_step)),
-            # )
-            # torch.save(
-            #     self.netg.state_dict(),
-            #     os.path.join(self.config.SAVE_DIR.GAN, "checkpoint_gen_{}.pth".format(self.global_step)),
-            # )
+            os.makedirs(self.log_dir, exist_ok=True)
             self.netg.visualize_gen_images(self.global_step)
         if self.global_step % self.config.ITER_VAL.GAN == 0:
             self.validate()
-
+        if self.config.ARCHITECTURE.GAN.CRITIC_ITER_DECAY and self.global_step in self.critic_iters_milestones:
+            self.critic_iters -= self.config.ARCHITECTURE.GAN.CRITIC_ITER_DECAY
     def validate(self):
         gen_data = self.netg.generate_training_images(self.config.GEN_IMG_NUM)
-        df = {'train': gen_data}
+
 
         gen_dataset = get_dataset(self.config.DATASET)(
-            df, config=self.config, split='train')
+            self.config, split='train', gen_values=gen_data)
 
         mixed_dataset = torch.utils.data.ConcatDataset([self.train_dataset, gen_dataset])
         mixed_loader = torch.utils.data.DataLoader(
@@ -138,14 +134,14 @@ class AuxiliaryClassifierWGAN:
 
         if val_loss < self.best_valid_loss:
             self.best_valid_loss = val_loss
-            os.makedirs(self.save_dir, exist_ok=True)
+            os.makedirs(self.log_dir, exist_ok=True)
             torch.save(
                 self.netd.state_dict(),
-                os.path.join(self.save_dir, "checkpoint_disc_best.pth".format(self.global_step)),
+                os.path.join(self.log_dir, "checkpoint_disc_best.pth".format(self.global_step)),
             )
             torch.save(
                 self.netg.state_dict(),
-                os.path.join(self.save_dir, "checkpoint_gen_best.pth".format(self.global_step)),
+                os.path.join(self.log_dir, "checkpoint_gen_best.pth".format(self.global_step)),
             )
 
 
@@ -158,71 +154,82 @@ class Generator(nn.Module):
         self.noise_dim = self.gan_architecture.NOISE_DIMS
         self.h = config.MATR_SIZE
         self.noise_dims = self.gan_architecture.NOISE_DIMS
+        self.use_coord = make_tuple(self.gan_architecture.COORDCONV_G)
+        self.a = float(self.gan_architecture.LRELU_SLOPE)
+        self.a = 0
         self.g_loss_meter = MovingAverageValueMeter(5)
         self.g_critic_loss_meter = MovingAverageValueMeter(5)
         self.g_pred_loss_meter = MovingAverageValueMeter(5)
-        self.log_dir = os.path.join('runs', self.config.DATASET, self.config.run_name, 'gan')
-        self.save_dir = os.path.join('save', self.config.DATASET, self.config.run_name, 'gan')
-
+        self.log_dir = os.path.join('runs', self.config.DATASET, self.config.RUN_NAME, 'gan')
+        self.loss_moving_mean = MovingMean(self.gan_architecture.LOSS_NORM_MOVING_MEAN)
         self.regr_loss_fn = nn.L1Loss()
+        # Model
+        self.lab_0 = nn.Sequential(
+            nn.Conv2d(1, self.dim, 1)
+        )
+        self.block0 = nn.Sequential(
+            nn.Conv2d(self.noise_dim, 3 * self.dim, 1),
+        )
 
-        self.preprocess_data = nn.Sequential(
-            nn.Linear(self.noise_dim, 2 * self.dim),
-            nn.ReLU(True),
+        self.block_lab_0 = nn.Sequential(
+            nn.BatchNorm2d(self.dim * 4),
+            nn.LeakyReLU(negative_slope=self.a, inplace=True),
         )
-        self.fc1_labels = nn.Sequential(
-            nn.Linear(1, 2 * self.dim),
-            nn.ReLU(True),
-        )
-        # concat, reshape
+
         self.block1 = nn.Sequential(
             nn.ConvTranspose2d(4 * self.dim, 2 * self.dim, (1, self.h)),
-        )
-
-        self.fc2_labels = nn.Sequential(
-            nn.Linear(1, 2 * self.dim * self.h),
-        )  # + reshape
-
-        # concat
-        self.bn_relu = nn.Sequential(
-            nn.BatchNorm2d(4 * self.dim),
-            nn.ReLU(True),
-
+            nn.BatchNorm2d(self.dim * 2),
+            nn.LeakyReLU(negative_slope=self.a, inplace=True),
         )
         self.block2 = nn.Sequential(
-            nn.ConvTranspose2d(4 * self.dim, 1, (self.h, 1)),  # 2.nd arg DIM
+            CoordConvTranspose(2 * self.dim, self.dim, use_coord=self.use_coord[0], kernel_size=(self.h, 1)),  # 2.nd arg DIM
+            nn.BatchNorm2d(self.dim),
+            nn.LeakyReLU(negative_slope=self.a, inplace=True),
+        )
+        self.block3 = nn.Sequential(
+            CoordConv(self.dim, 1, use_coord=self.use_coord[1], kernel_size=1),
+            nn.BatchNorm2d(1),
         )
         self.sigmoid = nn.Tanh()
+
+        ###
+
         self.optimizer = self.get_optimizer()
+        milestones = [self.config.ITER_MAX.GAN // 10 * s for s in range(10)]
+        self.scheduler = torch.optim.lr_scheduler.MultiStepLR(self.optimizer, milestones=milestones,
+                                                              gamma=self.config.OPTIMIZER.GAN.G.POWER)
 
-    def forward(self, data, labels):
-        labels = labels.view(-1, 1)
-        output_data = self.preprocess_data(data)
-        output_labels = self.fc1_labels(labels)
-        output = torch.cat([output_data, output_labels], 1).view(-1, 4 * self.dim, 1, 1)
-        output_data = self.block1(output)
-        output_labels = self.fc2_labels(labels).view(-1, 2 * self.dim, 1, self.h)
-        output = torch.cat([output_data, output_labels], 1)
-        output = self.bn_relu(output)
-        output = self.block2(output)
-        output = self.sigmoid(output)
-        output = (output + torch.transpose(output, -1, -2)) / 2
-        return output.view(-1, self.h * self.h)
+        self.init_weights()
 
-    def init(self):
+    def forward(self, x, labels):
+        x = x.view(-1, self.noise_dim, 1, 1)
+        labels = labels.view(-1, 1, 1, 1)
+        x = torch.cat([self.block0(x), self.lab_0(labels)], 1)
+        x = self.block_lab_0(x)
+        x = self.block1(x)
+        x = self.block2(x)
+        x = self.block3(x)
+        x = self.sigmoid(x)
+        x = (x+torch.transpose(x, -1, -2))/2
+        return x.view(-1, self.h, self.h)
+
+    def init_weights(self):
         for m in self.modules():
             if isinstance(m, nn.ConvTranspose2d):
-                torch.nn.init.kaiming_normal_(m.weight, nonlinearity='relu')
+                torch.nn.init.kaiming_normal_(m.weight, a=self.a, nonlinearity='leaky_relu')
                 if not m.bias is None:
                     torch.nn.init.constant_(m.bias, 0)
+            elif isinstance(m, nn.Conv2d):
+                torch.nn.init.kaiming_normal_(m.weight, a=self.a, nonlinearity='leaky_relu')
+                if not m.bias is None:
+                    torch.nn.init.constant_(m.bias, 0)
+            elif isinstance(m, CoordConvTranspose):
+                torch.nn.init.kaiming_normal_(m.conv.weight, a=self.a, nonlinearity='leaky_relu')
+                if not m.conv.bias is None:
+                    torch.nn.init.constant_(m.conv.bias, 0)
             elif isinstance(m, nn.BatchNorm2d):
                 torch.nn.init.constant_(m.weight, 1)
                 torch.nn.init.constant_(m.bias, 0)
-            elif isinstance(m, nn.Linear):
-                torch.nn.init.kaiming_normal_(m.weight, nonlinearity='relu')
-                if not m.bias is None:
-                    torch.nn.init.constant_(m.bias, 0)
-
     def train_step(self, netd):
         self.zero_grad()
 
@@ -235,10 +242,14 @@ class Generator(nn.Module):
         fake = self(noise, fake_labels)
         self.d_fake_critic, self.d_fake_pred = netd(fake)
         self.d_fake_critic = self.d_fake_critic.mean()
+        moving_mean = self.loss_moving_mean.get_avg()
         self.fake_regr_loss = self.regr_loss_fn(self.d_fake_pred, fake_labels)
-        self.g_cost = - self.d_fake_critic - self.fake_regr_loss * self.gan_architecture.LAMBDA_REGR
+        self.g_cost = - self.d_fake_critic / moving_mean+ self.fake_regr_loss * self.gan_architecture.LAMBDA_REGR
+
         self.g_cost.backward()
         self.optimizer.step()
+        self.loss_moving_mean.add(self.d_fake_critic.detach().cpu().numpy())
+
         self.hook_fn()
 
     def hook_fn(self):
@@ -269,7 +280,7 @@ class Generator(nn.Module):
 
     def generate_rnd_labels(self):
         batch_size = self.config.BATCH_SIZE.GAN.TRAIN
-        return (torch.rand(batch_size) * 2 - 1).type(torch.float)
+        return (torch.rand(batch_size) - 0.5).type(torch.float)
 
     def generate_training_images(self, num_images):
         self.eval()
@@ -278,8 +289,8 @@ class Generator(nn.Module):
 
         age_m = make_tuple(self.config.AGE_INTERVAL)[0]
         age_M = make_tuple(self.config.AGE_INTERVAL)[1]
-        normed_labels = (torch.rand(num_images) * 2 - 1).cuda()
-        labels = (age_m + (normed_labels + 1) / 2 * (age_M - age_m)).type(torch.int)
+        normed_labels = (torch.rand(num_images) - 0.5).cuda()
+        labels = (age_m + (normed_labels + 0.5) * (age_M - age_m))
         images = np.empty((num_images, 1, self.h, self.h)).astype(np.float32)
         # for i in tqdm(
         #         range(0, num_images // b),
@@ -302,17 +313,12 @@ class Generator(nn.Module):
         h = self.config.MATR_SIZE
         self.eval()
         noise = torch.randn(num_images, noise_dims).cuda().requires_grad_(False)
-        if self.config.SUPERVISE_TYPE == 'binary':
-            labels = torch.Tensor([[0], [0], [0],
-                                   [1], [1], [1]]).cuda().requires_grad_(False)
-            samples = self(noise, labels)
-        elif self.config.SUPERVISE_TYPE == 'regress':
-            age_m = make_tuple(self.config.AGE_INTERVAL)[0]
-            age_M = make_tuple(self.config.AGE_INTERVAL)[1]
-            lab1 = (age_m + torch.rand(num_images // 2) * (55 - age_m)).type(torch.int)
-            lab2 = (55 + torch.rand(num_images // 2) * (age_M - 55)).type(torch.int)
-            labels = torch.cat([lab1, lab2], 0).type(torch.float).cuda().requires_grad_(False)
-            samples = self(noise, (labels - (age_M - age_m) / 2) / (age_M - age_m))
+        age_m = make_tuple(self.config.AGE_INTERVAL)[0]
+        age_M = make_tuple(self.config.AGE_INTERVAL)[1]
+        lab1 = (age_m + torch.rand(num_images // 2) * (55 - age_m)).type(torch.int)
+        lab2 = (55 + torch.rand(num_images // 2) * (age_M - 55)).type(torch.int)
+        labels = torch.cat([lab1, lab2], 0).type(torch.float).cuda().requires_grad_(False)
+        samples = self(noise, (labels - (age_M - age_m) / 2-age_m) / (age_M - age_m))
         samples = samples.view(num_images, 1, h, h)
 
         i = str(global_step)
@@ -346,6 +352,8 @@ class Discriminator(nn.Module):
         self.lambda_gp = self.gan_architecture.LAMBDA_GP
         self.lambda_ct = self.gan_architecture.LAMBDA_CT
         self.ct_m = self.gan_architecture.CT_M
+        self.a = float(self.gan_architecture.LRELU_SLOPE)
+        self.use_coord = make_tuple(self.gan_architecture.COORDCONV_G)
 
         self.w_loss_meter = MovingAverageValueMeter(5)
         self.d_loss_meter = MovingAverageValueMeter(5)
@@ -356,43 +364,67 @@ class Discriminator(nn.Module):
         self.r_c_loss_meter = MovingAverageValueMeter(5)
         self.f_c_loss_meter = MovingAverageValueMeter(5)
         self.regr_loss_fn = nn.L1Loss()
+        self.loss_moving_mean = MovingMean(self.gan_architecture.LOSS_NORM_MOVING_MEAN)
+
+
+        self.block0 = nn.Sequential(
+            CoordConv(1, 8 * self.dim, use_coord=self.use_coord[0], kernel_size=(self.h, 1)),
+            # nn.BatchNorm2d(4 * self.dim),
+            nn.LeakyReLU(negative_slope=self.a),
+            # nn.Dropout2d(self.p)
+        )
 
         self.block1 = nn.Sequential(
-            nn.Conv2d(1, 4 * self.dim, (self.h, 1)),
-            nn.ReLU(),
-            nn.Dropout2d(self.p)
+            CoordConv(8 * self.dim, 4 * self.dim, use_coord=self.use_coord[1], kernel_size=(1, self.h)),
+            # nn.BatchNorm2d(2 * self.dim),
+            nn.LeakyReLU(negative_slope=self.a),
+            # nn.Dropout2d(self.p)
         )
-
         self.block2 = nn.Sequential(
-            nn.Conv2d(4 * self.dim, 2 * self.dim, (1, self.h)),
-            nn.ReLU(),
-            nn.Dropout(self.p)
+            nn.Conv2d(4 * self.dim, 2 * self.dim, 1),
+            # nn.BatchNorm2d(self.dim),
+            nn.LeakyReLU(negative_slope=self.a),
+            # nn.Dropout2d(self.p),
         )
-
-        self.block3 = nn.Sequential(
+        self.last_common = nn.Sequential(
+            nn.Linear(2 * self.dim, 2 * self.dim),
+            nn.LeakyReLU(negative_slope=self.a),
+        )
+        self.critic_fc = nn.Sequential(
             nn.Linear(2 * self.dim, self.dim),
-            nn.ReLU(),
-            nn.Dropout(self.p),
+            nn.LeakyReLU(negative_slope=self.a),
         )
-
+        self.regr_fc = nn.Sequential(
+            nn.Linear(2 * self.dim, self.dim),
+            nn.LeakyReLU(negative_slope=self.a),
+        )
         self.critic_output = nn.Linear(self.dim, 1)
         self.prediction_output = nn.Linear(self.dim, 1)
 
         self.optimizer = self.get_optimizer()
+        milestones = [self.config.ITER_MAX.GAN // 10 * s for s in range(10)]
+        self.scheduler = torch.optim.lr_scheduler.MultiStepLR(self.optimizer, milestones=milestones,
+                                                              gamma=self.config.OPTIMIZER.GAN.D.POWER)
+
+
+        self.init_weights()
 
     def forward(self, x):
-        x = x.view(-1, 1, self.h, self.h)
+        x = self.block0(x.view(-1, 1, self.h, self.h))
         x = self.block1(x)
         x = self.block2(x)
-        x = self.block3(x.view(-1, 2 * self.dim))
-        out_critic = self.critic_output(x)
-        out_pred = self.prediction_output(x)
-        return out_critic.view(-1), out_pred.view(-1)
+        x = x.view(-1, 2 * self.dim)
+        x = self.last_common(x)
+        x_critic = self.critic_fc(x)
+        x_regr = self.regr_fc(x)
+        x_critic = self.critic_output(x_critic)
+        x_pred = self.prediction_output(x_regr)
+        return x_critic.view(-1), x_pred.view(-1)
 
-    def init(self):
+    def init_weights(self):
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
-                torch.nn.init.kaiming_normal_(m.weight, nonlinearity='relu')
+                torch.nn.init.kaiming_normal_(m.weight, a=self.a, nonlinearity='leaky_relu')
                 if not m.bias is None:
                     torch.nn.init.constant_(m.bias, 0)
             elif isinstance(m, nn.BatchNorm2d):
@@ -402,9 +434,10 @@ class Discriminator(nn.Module):
                 torch.nn.init.constant_(m.weight, 1)
                 torch.nn.init.constant_(m.bias, 0)
             elif isinstance(m, nn.Linear):
-                torch.nn.init.kaiming_normal_(m.weight, nonlinearity='relu')
+                torch.nn.init.kaiming_normal_(m.weight, a=self.a, nonlinearity='leaky_relu')
                 if not m.bias is None:
                     torch.nn.init.constant_(m.bias, 0)
+
 
     def get_optimizer(self):
         optimizer = {
@@ -451,11 +484,13 @@ class Discriminator(nn.Module):
         self.d_fake_critic = self.d_fake_critic.mean()
 
         self.fake_regr_loss = self.regr_loss_fn(self.d_fake_pred.view(-1,1), real_labels)
+        moving_mean = self.loss_moving_mean.get_avg()
 
-        self.d_cost = self.d_fake_critic - self.d_real_critic \
-                      + self.gan_architecture.LAMBDA_REGR * self.real_regr_loss \
-                      + self.gan_architecture.LAMBDA_REGR * self.fake_regr_loss
+        self.d_cost = (self.d_fake_critic - self.d_real_critic)/moving_mean \
+                      + self.gan_architecture.LAMBDA_REGR * self.real_regr_loss # / moving_mean \
+                      # + self.gan_architecture.LAMBDA_REGR * self.fake_regr_loss
         # train with gradient penalty
+
         if not self.lambda_gp == 0:
             self.gradient_penalty = self.calc_gradient_penalty_cond(
                 real_data.data,
@@ -463,25 +498,24 @@ class Discriminator(nn.Module):
             )
             self.d_cost += self.gradient_penalty * self.lambda_gp
 
-        # consistency_cost
-        if not self.lambda_ct == 0:
-            self.ct_cost = self.calc_consistency_penalty(
-                real_data.data,
-                real_labels,
-            )
-            self.d_cost += self.ct_cost * self.lambda_ct
+
 
         self.wasserstein_d = self.d_real_critic - self.d_fake_critic
         self.d_cost.backward()
+        self.loss_moving_mean.add((self.d_fake_critic - self.d_real_critic).detach().cpu().numpy())
+
         self.hook_fn()
+
+
         self.optimizer.step()
 
-    def hook_fn(self):
 
+
+    def hook_fn(self):
         self.w_loss_meter.add(self.wasserstein_d.detach().cpu())
         self.d_loss_meter.add(self.d_cost.detach().cpu())
-        self.d_real_regr_loss_meter.add(self.loss_denorm_fn(self.fake_regr_loss.detach().cpu()))
-        self.d_fake_regr_loss_meter.add(self.loss_denorm_fn(self.real_regr_loss.detach().cpu()))
+        self.d_real_regr_loss_meter.add(self.loss_denorm_fn(self.real_regr_loss.detach().cpu()))
+        self.d_fake_regr_loss_meter.add(self.loss_denorm_fn(self.fake_regr_loss.detach().cpu()))
         self.r_c_loss_meter.add(self.d_real_critic.detach().cpu())
         self.f_c_loss_meter.add(self.d_fake_critic.detach().cpu())
 
@@ -514,4 +548,30 @@ class Discriminator(nn.Module):
     def loss_denorm_fn(self, x):
         age_m = make_tuple(self.config.AGE_INTERVAL)[0]
         age_M = make_tuple(self.config.AGE_INTERVAL)[1]
+        if isinstance(self.regr_loss_fn, nn.MSELoss):
+            x = torch.sqrt(x)
         return x * (age_M - age_m)
+
+class MovingMean:
+    def __init__(self, num_of_values):
+        self.num_of_values = num_of_values
+        self.values = []
+    def add(self, value):
+        if len(self.values) >= self.num_of_values:
+            _ = self.values.pop(0)
+        self.values.append(value)
+    def get_avg(self):
+        # avg = torch.Tensor([0]).cuda()
+        # for i in range(len(self.values)):
+        #     avg +=torch.abs(self.values[i])
+        # if len(self.values) ==0:
+        #     return 1
+        # else:
+        #     return avg / len(self.values)
+
+        if len(self.values) == 0:
+            return 1
+        else:
+            return float(np.average(self.values))
+
+

@@ -22,7 +22,7 @@ import matplotlib.pyplot as plt
 
 
 
-class ConditionalWGAN:
+class GAN:
     def __init__(
             self,
             config,
@@ -33,22 +33,28 @@ class ConditionalWGAN:
         self.train_dataset = train_dataset
         self.val_loader = val_loader
 
+        
         self.netg = Generator(self.config)
         self.netd = Discriminator(self.config)
+    
 
         self.global_step = 0
         self.best_valid_loss = np.inf
 
         self.log_dir = os.path.join('runs', self.config.DATASET, self.config.run_name)
+        os.makedirs(self.log_dir, exist_ok=True)
+
         self.writer = SummaryWriter(self.log_dir)
 
     def train(self):
+
         loader = torch.utils.data.DataLoader(
             dataset=self.train_dataset,
             batch_size=self.config.BATCH_SIZE.GAN.TRAIN,
             num_workers=self.config.NUM_WORKERS.GAN,
             shuffle=True,
         )
+
         dataiter = iter(loader)
         max_iter = self.config.ITER_MAX.GAN
         for iteration in tqdm(
@@ -80,25 +86,27 @@ class ConditionalWGAN:
 
     def global_hook_fn(self):
         ### this can go to child
-        if self.global_step % self.config.ITER_TB.GAN == 0:
-            self.writer.add_scalar("wasserstein_loss", self.netd.w_loss_meter.value()[0], self.global_step)
-            self.writer.add_scalar("discriminator_loss", self.netd.d_loss_meter.value()[0], self.global_step)
-            self.writer.add_scalar("disc_real_loss", self.netd.r_loss_meter.value()[0], self.global_step)
-            self.writer.add_scalar("disc_fake_loss", self.netd.d_loss_meter.value()[0], self.global_step)
-            if not self.config.ARCHITECTURE.GAN.LAMBDA_GP == 0:
-                self.writer.add_scalar("gradient_penalty", self.netd.gp_loss_meter.value()[0], self.global_step)
-            if not self.config.ARCHITECTURE.GAN.LAMBDA_CT == 0:
-                self.writer.add_scalar("consistency_cost", self.netd.ct_loss_meter.value()[0], self.global_step)
-            self.writer.add_scalar("generator_loss", self.netg.g_loss_meter.value()[0], self.global_step)
-        ###
-        if self.global_step % self.config.ITER_SAVE.GAN == 0:
-            os.makedirs(self.log_dir, exist_ok=True)
-            self.netg.visualize_gen_images(self.global_step)
+        # if self.global_step % self.config.ITER_TB.GAN == 0:
+        #     self.writer.add_scalar("wasserstein_loss", self.netd.w_loss_meter.value()[0], self.global_step)
+        #     self.writer.add_scalar("discriminator_loss", self.netd.d_loss_meter.value()[0], self.global_step)
+        #     self.writer.add_scalar("disc_real_loss", self.netd.r_loss_meter.value()[0], self.global_step)
+        #     self.writer.add_scalar("disc_fake_loss", self.netd.d_loss_meter.value()[0], self.global_step)
+        #     if not self.gan_architecture.LAMBDA_GP == 0:
+        #         self.writer.add_scalar("gradient_penalty", self.netd.gp_loss_meter.value()[0], self.global_step)
+        #     if not self.gan_architecture.LAMBDA_CT == 0:
+        #         self.writer.add_scalar("consistency_cost", self.netd.ct_loss_meter.value()[0], self.global_step)
+        #     self.writer.add_scalar("generator_loss", self.netg.g_loss_meter.value()[0], self.global_step)
+        # ###
+        self.netd.hook_fn()
+        self.netg.hook_fn()
+        # if self.global_step % self.config.ITER_SAVE.GAN == 0:
+        #     os.makedirs(self.log_dir, exist_ok=True)
+        #     self.netg.visualize_gen_images(self.global_step)
         if self.global_step % self.config.ITER_VAL.GAN == 0:
             self.validate()
 
     def validate(self):
-        gen_data = self.netg.generate_training_images(self.config.GEN_IMG_MULT * len(self.train_dataset))
+        gen_data = self.netg.generate_training_images(self.config.GEN_IMG_NUM)
         df = {'train': gen_data}
 
         gen_dataset = get_dataset(self.config.DATASET)(
@@ -118,7 +126,6 @@ class ConditionalWGAN:
 
         if val_loss < self.best_valid_loss:
             self.best_valid_loss = val_loss
-            os.makedirs(self.log_dir, exist_ok=True)
             torch.save(
                 self.netd.state_dict(),
                 os.path.join(self.log_dir, "checkpoint_disc_best.pth".format(self.global_step)),
@@ -138,17 +145,16 @@ class Generator(nn.Module):
         self.noise_dim = self.gan_architecture.NOISE_DIMS
         self.h = config.MATR_SIZE
         self.noise_dims = self.gan_architecture.NOISE_DIMS
-        self.a = float(self.gan_architecture.LRELU_SLOPE)
         self.g_loss_meter = MovingAverageValueMeter(5)
         self.log_dir = os.path.join('runs', self.config.DATASET, self.config.run_name, 'gan')
-
+        self.log_dir = os.path.join('save', self.config.DATASET, self.config.run_name, 'gan')
         self.preprocess_data = nn.Sequential(
             nn.Linear(self.noise_dim, 2 * self.dim),
-            nn.LeakyReLU(negative_slope=self.a, inplace=True),
+            nn.ReLU(True),
         )
         self.fc1_labels = nn.Sequential(
             nn.Linear(1, 2 * self.dim),
-            nn.LeakyReLU(negative_slope=self.a, inplace=True),
+            nn.ReLU(True),
         )
         # concat, reshape
         self.block1 = nn.Sequential(
@@ -162,7 +168,7 @@ class Generator(nn.Module):
         # concat
         self.bn_relu = nn.Sequential(
             nn.BatchNorm2d(4 * self.dim),
-            nn.LeakyReLU(negative_slope=self.a, inplace=True),
+            nn.ReLU(True),
 
         )
         self.block2 = nn.Sequential(
@@ -189,14 +195,14 @@ class Generator(nn.Module):
     def init_weights(self):
         for m in self.modules():
             if isinstance(m, nn.ConvTranspose2d):
-                torch.nn.init.kaiming_normal_(m.weight, a=self.a, nonlinearity='leaky_relu')
+                torch.nn.init.kaiming_normal_(m.weight, nonlinearity='relu')
                 if not m.bias is None:
                     torch.nn.init.constant_(m.bias, 0)
             elif isinstance(m, nn.BatchNorm2d):
                 torch.nn.init.constant_(m.weight, 1)
                 torch.nn.init.constant_(m.bias, 0)
             elif isinstance(m, nn.Linear):
-                torch.nn.init.kaiming_normal_(m.weight, a=self.a, nonlinearity='leaky_relu')
+                torch.nn.init.kaiming_normal_(m.weight, nonlinearity='relu')
                 if not m.bias is None:
                     torch.nn.init.constant_(m.bias, 0)
 
@@ -228,17 +234,6 @@ class Generator(nn.Module):
                 lr=float(self.config.OPTIMIZER.GAN.G.LR_ADAM),
                 betas=make_tuple(self.config.OPTIMIZER.GAN.G.BETAS),
             ),
-            # "sgd": torch.optim.SGD(  # Do not use!
-            #     self.parameters(),
-            #     lr=float(self.config.OPTIMIZER.GAN.G.LR_SGD),
-            #     momentum=self.config.OPTIMIZER.GAN.G.MOMENTUM,
-            #     nesterov=False,
-            # ),
-            # "rmsprop": torch.optim.RMSprop(
-            #     self.parameters(),
-            #     lr=float(self.config.OPTIMIZER.GAN.G.LR_RMS),
-            #     momentum=self.config.OPTIMIZER.GAN.G.MOMENTUM,
-            # ),
         }[self.config.OPTIMIZER.GAN.G.ALG]
         return optimizer
 
@@ -254,14 +249,8 @@ class Generator(nn.Module):
         age_m = make_tuple(self.config.AGE_INTERVAL)[0]
         age_M = make_tuple(self.config.AGE_INTERVAL)[1]
         normed_labels = (torch.rand(num_images) * 2 - 1).cuda()
-        labels = age_m + (normed_labels + 1)/2 * (age_M - age_m)
+        labels = (age_m + (normed_labels + 1) / 2 * (age_M - age_m)).type(torch.int)
         images = np.empty((num_images, 1, self.h, self.h)).astype(np.float32)
-        # for i in tqdm(
-        #         range(0, num_images // b),
-        #         total=num_images // b,
-        #         leave=False,
-        #         dynamic_ncols=True,
-        # ):
         for i in range(num_images // b):
             noise = torch.randn(b, noise_dims).cuda().requires_grad_(False)
             samples = self(noise, normed_labels[i * b:(i + 1) * b])
@@ -269,7 +258,7 @@ class Generator(nn.Module):
             images[i * b:(i + 1) * b] = samples
         labels = labels.cpu().numpy().reshape(-1)
         self.train()
-        return images, labels
+        return (images, labels)
 
     def visualize_gen_images(self, global_step):
         num_images = 6
@@ -282,7 +271,7 @@ class Generator(nn.Module):
         lab1 = (age_m + torch.rand(num_images // 2) * (55 - age_m)).type(torch.int)
         lab2 = (55 + torch.rand(num_images // 2) * (age_M - 55)).type(torch.int)
         labels = torch.cat([lab1, lab2], 0).type(torch.float).cuda().requires_grad_(False)
-        samples = self(noise, (labels - age_m-(age_M - age_m) / 2) / (age_M - age_m)*2)
+        samples = self(noise, (labels - (age_M - age_m) / 2) / (age_M - age_m))
         samples = samples.view(num_images, 1, h, h)
 
         i = str(global_step)
@@ -313,7 +302,7 @@ class Discriminator(nn.Module):
         self.lambda_gp = self.gan_architecture.LAMBDA_GP
         self.lambda_ct = self.gan_architecture.LAMBDA_CT
         self.ct_m = self.gan_architecture.CT_M
-        self.a = float(self.gan_architecture.LRELU_SLOPE)
+
         self.w_loss_meter = MovingAverageValueMeter(5)
         self.d_loss_meter = MovingAverageValueMeter(5)
         self.r_loss_meter = MovingAverageValueMeter(5)
@@ -331,7 +320,7 @@ class Discriminator(nn.Module):
         # concat
         self.bn_relu_dropout_1 = nn.Sequential(
             # nn.BatchNorm2d(4 * self.dim),
-            nn.LeakyReLU(negative_slope=self.a),
+            nn.ReLU(),
             nn.Dropout2d(self.p)
         )
         self.conv2 = nn.Sequential(
@@ -344,39 +333,39 @@ class Discriminator(nn.Module):
 
         self.bn_relu_dropout_2 = nn.Sequential(
             # nn.BatchNorm1d(2 * self.dim),
-            nn.LeakyReLU(negative_slope=self.a),
+            nn.ReLU(),
             nn.Dropout(self.p)
         )
         # concat
         self.fc = nn.Sequential(
             nn.Linear(2 * self.dim, self.dim),
             # nn.BatchNorm1d(self.dim),
-            nn.LeakyReLU(negative_slope=self.a),
+            nn.ReLU(),
             nn.Dropout(self.p),
         )
         self.output = nn.Linear(self.dim, 1)
         self.optimizer = self.get_optimizer()
         self.init_weights()
-
+        
     def forward(self, data, labels):
         labels = labels.view(-1, 1)
-        x_data = self.conv1_data(data.view(-1, 1, self.h, self.h))
-        x_labels = self.fc1_labels(labels).view(-1, 2 * self.dim, 1, self.h)
-        x = torch.cat([x_data, x_labels], 1)
-        x = self.bn_relu_dropout_1(x)
-        x_data = self.conv2(x)
-        x_labels = self.fc2_labels(labels).view(-1, self.dim, 1, 1)
-        x = torch.cat([x_data, x_labels], 1)
-        x = x.view(-1, 2 * self.dim)
-        x = self.bn_relu_dropout_2(x)
-        x_aux = self.fc(x)
-        x = self.output(x)
-        return x.view(-1), x_aux.view(-1)
+        output_data = self.conv1_data(data.view(-1, 1, self.h, self.h))
+        output_labels = self.fc1_labels(labels).view(-1, 2 * self.dim, 1, self.h)
+        output = torch.cat([output_data, output_labels], 1)
+        output = self.bn_relu_dropout_1(output)
+        output_data = self.conv2(output)
+        output_labels = self.fc2_labels(labels).view(-1, self.dim, 1, 1)
+        output = torch.cat([output_data, output_labels], 1)
+        output = output.view(-1, 2 * self.dim)
+        output = self.bn_relu_dropout_2(output)
+        output_aux = self.fc(output)
+        output = self.output(output_aux)
+        return output.view(-1), output_aux.view(-1, self.dim)
 
     def init_weights(self):
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
-                torch.nn.init.kaiming_normal_(m.weight, a=self.a, nonlinearity='leaky_relu')
+                torch.nn.init.kaiming_normal_(m.weight, nonlinearity='relu')
                 if not m.bias is None:
                     torch.nn.init.constant_(m.bias, 0)
             elif isinstance(m, nn.BatchNorm2d):
@@ -386,7 +375,7 @@ class Discriminator(nn.Module):
                 torch.nn.init.constant_(m.weight, 1)
                 torch.nn.init.constant_(m.bias, 0)
             elif isinstance(m, nn.Linear):
-                torch.nn.init.kaiming_normal_(m.weight, a=self.a, nonlinearity='leaky_relu')
+                torch.nn.init.kaiming_normal_(m.weight, nonlinearity='relu')
                 if not m.bias is None:
                     torch.nn.init.constant_(m.bias, 0)
 
@@ -473,3 +462,9 @@ class Discriminator(nn.Module):
         gradient_penalty = ((gradients.norm(2, dim=1) - 1) ** 2).mean()
         return gradient_penalty
 
+    def calc_consistency_penalty(self, real_data, real_labels):
+        d1, d_1 = self(real_data, real_labels)
+        d2, d_2 = self(real_data, real_labels)
+
+        consistency_term = (d1 - d2).norm(2, dim=0) + 0.1 * (d_1 - d_2).norm(2, dim=1) - self.ct_m
+        return consistency_term.mean()
