@@ -119,3 +119,30 @@ class UKBioBankHandler(data.Dataset):
 
     def __len__(self):
         return len(self.images)
+
+class UKBioBankGenderHandler(data.Dataset):
+    def __init__(
+            self,
+            config,
+            number_of_examples=None,
+            split='train',
+            gen_values=None
+    ):
+        self.config = config
+        if gen_values is None:
+            npz_filename = os.path.join(config.DATA_FOLDER, config.DATASET_PART)
+            with np.load(npz_filename) as df:
+                dataset = df[split + '_dataset']
+            self.images = dataset[:number_of_examples, 0]
+            self.labels = dataset[:number_of_examples, 1]
+        else:
+            self.images, self.labels = gen_values
+
+
+    def __getitem__(self, index):
+        image, label = torch.Tensor(self.images[index]), torch.Tensor([self.labels[index]])
+        return image.type(torch.float).view(1, self.config.MATR_SIZE, self.config.MATR_SIZE), label.type(
+            torch.long).view(1)
+
+    def __len__(self):
+        return len(self.images)

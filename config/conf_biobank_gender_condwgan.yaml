@@ -1,10 +1,10 @@
-DATASET: biobank
+DATASET: biobank_gender
 DATA_FOLDER: F:/HajduIstvan/UK_Biobank/
-DATASET_PART: partitioned_dataset.npz
-GAN_MODEL: ConditionalFCWGAN
-RUN_NAME: biobank_condwgan_allrange_noorig_0
-RUN_MODE: regress
-CLASS_FROZEN_INIT_FILENAME: frozen_init_bio_ch128_64_n32_16.pth
+DATASET_PART: partitioned_dataset_gender.npz
+GAN_MODEL: ConditionalFCWGAN_gender
+RUN_NAME: biobank_gender_exp_run_0
+RUN_MODE: gender
+CLASS_FROZEN_INIT_FILENAME: frozen_init_bio_gender_ch128_64_n32_16.pth
 MATR_SIZE: 55
 EXP_TRAIN_SIZES: (200, 400, 800, 1600, 2000, 4000, 8000, 14864)
 EXP_VAL_SIZES: (50, 100, 200, 400, 500, 1000, 2000, 2477)
@@ -21,10 +21,10 @@ NUM_WORKERS:
   CLASS: 0
   GAN: 0
 ITER_MAX:
-  CLASS: 75001
+  CLASS: 20001
   GAN: 1201
 ITER_VAL:
-  CLASS: 1000
+  CLASS: 100
   GAN: 200
 ITER_SAVE:
 #  CLASS: 5000
@@ -62,7 +62,7 @@ ARCHITECTURE:
   CLASS:
     COORDCONV: (0,0)
     CHS: (128, 64) #
-    NEURONS: (32, 16, 1)
+    NEURONS: (32, 16, 2)
     DROPOUT: 0.5
     LOSS_FN: L1
   GAN:
@@ -80,7 +80,6 @@ ARCHITECTURE:
     CT_M: 0
     LRELU_SLOPE: 0.01
 #SPLIT_LIMITS: (0.7, 0.9)
-AGE_INTERVAL: (44.583333333333336, 80.66666666666667)
 #OUTLY_MIXER: 0.5
 #OUTLY_THRESHOLD: 0.0025
 GEN_IMG_NUM: 9000
