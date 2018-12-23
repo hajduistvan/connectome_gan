@@ -2,7 +2,7 @@ DATASET: biobank_gender
 DATA_FOLDER: F:/HajduIstvan/UK_Biobank/
 DATASET_PART: partitioned_dataset_gender.npz
 GAN_MODEL: ConditionalFCWGAN_gender
-RUN_NAME: biobank_gender_exp_run_0
+RUN_NAME: biobank_gender_exp_run_5
 RUN_MODE: gender
 CLASS_FROZEN_INIT_FILENAME: frozen_init_bio_gender_ch128_64_n32_16.pth
 MATR_SIZE: 55
@@ -21,11 +21,11 @@ NUM_WORKERS:
   CLASS: 0
   GAN: 0
 ITER_MAX:
-  CLASS: 20001
-  GAN: 1201
+  CLASS: 10001
+  GAN: 1001
 ITER_VAL:
   CLASS: 100
-  GAN: 200
+  GAN: 100
 ITER_SAVE:
 #  CLASS: 5000
   GAN: 25
@@ -69,9 +69,9 @@ ARCHITECTURE:
     NOISE_DIMS: 32
     DIM: 128
     CRITIC_ITERS: 10 # 3
-    CRITIC_ITER_DECAY: 1
-    COORDCONV_G: (1, 1)
-    COORDCONV_D: (1, 1)
+    CRITIC_ITER_DECAY: 0
+    COORDCONV_G: (0, 0)
+    COORDCONV_D: (0, 0)
     DROPOUT: 0.5
     LAMBDA_CRITIC: 0
     LAMBDA_REGR: 1500
@@ -84,5 +84,5 @@ ARCHITECTURE:
 #OUTLY_THRESHOLD: 0.0025
 GEN_IMG_NUM: 9000
 GEN_IMG_MULT: 9
-ONLY_GEN: 1
+ONLY_GEN: 0
 #GEN_EARLY_IT: 385

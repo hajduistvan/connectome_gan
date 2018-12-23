@@ -100,7 +100,7 @@ class ConditionalFCWGAN_gender:
             self.netg.visualize_gen_images(self.global_step, self.exp_name)
         if self.global_step % self.config.ITER_VAL.GAN == 0:
             self.validate()
-        if self.global_step in self.critic_iters_milestones:
+        if self.config.ARCHITECTURE.GAN.CRITIC_ITER_DECAY and self.global_step in self.critic_iters_milestones:
             self.critic_iters -= 1
 
     def validate(self):
@@ -168,24 +168,24 @@ class Generator(nn.Module):
         )
 
         self.block_lab_0 = nn.Sequential(
-            nn.BatchNorm2d(self.dim * 4),
+            # nn.BatchNorm2d(self.dim * 4),
             nn.LeakyReLU(negative_slope=self.a, inplace=True),
         )
 
         self.block1 = nn.Sequential(
-            nn.ConvTranspose2d(4 * self.dim, 2 * self.dim, (1, self.h)),
-            nn.BatchNorm2d(self.dim * 2),
+            nn.ConvTranspose2d(4 * self.dim, 4 * self.dim, (1, self.h)),
+            # nn.BatchNorm2d(self.dim * 2),
             nn.LeakyReLU(negative_slope=self.a, inplace=True),
         )
         self.block2 = nn.Sequential(
-            CoordConvTranspose(2 * self.dim, self.dim, use_coord=self.use_coord[0], kernel_size=(self.h, 1)),  # 2.nd arg DIM
-            nn.BatchNorm2d(self.dim),
-            nn.LeakyReLU(negative_slope=self.a, inplace=True),
+            CoordConvTranspose(4 * self.dim, 1, use_coord=self.use_coord[0], kernel_size=(self.h, 1)),  # 2.nd arg DIM
+            # nn.BatchNorm2d(self.dim),
+            # nn.LeakyReLU(negative_slope=self.a, inplace=True),
         )
-        self.block3 = nn.Sequential(
-            CoordConv(self.dim, 1, use_coord=self.use_coord[1], kernel_size=1),
-            nn.BatchNorm2d(1),
-        )
+        # self.block3 = nn.Sequential(
+        #     CoordConv(self.dim, 1, use_coord=self.use_coord[1], kernel_size=1),
+        #     # nn.BatchNorm2d(1),
+        # )
         self.sigmoid = nn.Tanh()
 
         ###
@@ -205,7 +205,7 @@ class Generator(nn.Module):
         x = self.block_lab_0(x)
         x = self.block1(x)
         x = self.block2(x)
-        x = self.block3(x)
+        # x = self.block3(x)
         x = self.sigmoid(x)
         x = (x+torch.transpose(x, -1, -2))/2
         return x.view(-1, self.h, self.h)
