@@ -1,0 +1,85 @@
+man_seed: 420911
+batch_size: 16348
+batch_size_metric: 7000
+num_workers: 0
+
+noise_dim:
+  min: 1
+  max: 64
+  step: 2
+  log: True
+#channel_ranges:
+#  min: 2
+#  max: 128
+#  step: 2
+#  log: True
+base_dim:
+  min: 2
+  max: 8
+  step: 2
+  log: True
+channel_multipliers:
+  min: 1
+  max: 4
+  step: 2
+  log: True
+critic_iters:
+  min: 10
+  max: 10
+  step: 1
+  log: False
+lambda_gp:
+  min: 10
+  max: 10
+  step: 1
+  log: False
+
+
+bg0: False
+bg1: False
+bd0: False
+bd1: False
+bd2: False
+
+
+lr_g:
+  min: 2e-6
+  max: 2e-3
+  step: 5
+  log: True
+wd_g:
+  min: 1e-4
+  max: 1e-4
+  step: 5
+  log: True
+b1_g:  # beta1 = 1- b1
+  min: 0.5
+  max: 0.5
+  step: 0.1
+  log: False
+b2_g: # beta2 = 1-b2
+  min: 0.01
+  max: 0.1
+  step: 10
+  log: True
+
+lr_d:
+  min: 2e-6
+  max: 2e-3
+  step: 5
+  log: True
+wd_d:
+  min: 1e-4
+  max: 1e-4
+  step: 5
+  log: True
+b1_d:  # beta1 = 1- b1
+  min: 0.5
+  max: 0.5
+  step: 0.1
+  log: False
+b2_d: # beta2 = 1-b2
+  min: 0.01
+  max: 0.1
+  step: 10
+  log: True

@@ -1,0 +1,44 @@
+gan_name: condgan
+
+man_seed: 420911
+batch_size: 16348
+batch_size_metric: 7000
+num_workers: 0
+
+fid_interval: 1
+num_epochs: 500
+
+lrelu_g: 0.01
+lrelu_d: 0.01
+
+critic_iters: 10
+lambda_gp: 10
+lambda_g_gp: 0
+lambda_ce: 0 #1000
+noise_dim: 32
+
+bg0: False
+bg1: False
+bd0: False
+bd1: False
+bd2: False
+
+p1: 64
+p2: 64
+p3: 32
+
+q1: 96
+q2: 96
+q3: 48
+#q4: 16
+
+lr_g: 1e-2
+lr_d: 2e-1
+
+wd_g: 1e-4
+wd_d: 1e-4
+
+b1_g: 0.5
+b2_g: 0.99
+b1_d: 0.5
+b2_d: 0.99
