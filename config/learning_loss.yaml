@@ -3,7 +3,7 @@ batch_size: 14864
 batch_size_metric: 7000
 num_workers: 0
 
-# classifier
+# classifier: the hyperparameters of the Learner. The resulting test loss is the Learning Loss.
 c1: 256
 c2: 256
 lr: 0.00729
@@ -14,8 +14,7 @@ val_interval: 1
 
 #gan model
 run_name: cond_gan_debug_24
-gan_step: 250
+gan_step: 174
 
 # overall
-num_training_examples: [14864,]# 10000, 5000, 2500, 1000, 500, 200, 100]
-mode_strs: ['real', 'gen', 'r+g', 'r+z']
+num_training_examples: [14864,]

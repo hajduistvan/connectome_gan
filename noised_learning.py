@@ -1,7 +1,4 @@
-import numpy as np
 import torch
-import matplotlib.pyplot as plt
-import argparse
 import os
 import yaml
 from addict import Dict
@@ -22,8 +19,10 @@ def convert_to_float(df):
 
 
 class NoisedTrainer:
-    def __init__(self, gpu_id, log_dir, dataset_root):
-        cfg = '/home/orthopred/repositories/conn_gan/config/plot_lr_curve_cfg.yaml'
+    """
+    Used for testing WAD. Trains the CNN defined by cfg with noise added to the whole training set. Used in test_wad.py.
+    """
+    def __init__(self, gpu_id, log_dir, dataset_root, cfg):
         self.config_class = Dict(yaml.load(open(cfg)))
         self.log_dir = log_dir
         self.gpu_id = gpu_id
@@ -38,18 +37,22 @@ class NoisedTrainer:
                                                       num_workers=self.config_class.num_workers)
 
     def set_train_loader(self, aug_fn, num_total_examples=14864):
-            real_dataset = UKBioBankDataset(self.dataset_root, num_total_examples, 'train', aug_fn=aug_fn)
-            self.train_loader = torch.utils.data.DataLoader(real_dataset, self.config_class.batch_size, shuffle=True,
-                                                            num_workers=self.config_class.num_workers)
+        """
+        Uses aug_fn to add noise to the training dataset.
+        :param aug_fn:
+        :param num_total_examples:
+        :return:
+        """
+        real_dataset = UKBioBankDataset(self.dataset_root, num_total_examples, 'train', aug_fn=aug_fn)
+        self.train_loader = torch.utils.data.DataLoader(real_dataset, self.config_class.batch_size, shuffle=True,
+                                                        num_workers=self.config_class.num_workers)
 
     def run_train_cycle(self, run_id):
         """
-
-        :param mode_str: 'real': only real examples. 'gen': only gan-generated examples. 'r+g': real + gen 1:1. 'r+z': real + noisy data 1:1
-        :param numbers: total number of examples
-        :return:
+        Trains the classifier, then tests it.
+        :param run_id:
+        :return: the test loss and acc.
         """
-
         classifier = ConnectomeConvNet(
             (self.config_class.c1, self.config_class.c2),
             self.config_class.lr,
@@ -65,35 +68,7 @@ class NoisedTrainer:
             allow_stop=False,
             verbose=True
         )
-        _,_,_ = classifier.run_train()
+        _, _, _ = classifier.run_train()
         testloss, testacc = classifier.test(self.test_loader)
         print(testloss, testacc)
         return testloss, testacc
-
-# def plot_learning_curves(args):
-#     cfg_dir = '/home/orthopred/repositories/conn_gan/config'
-#     runs_dir = '/home/orthopred/repositories/conn_gan/learning_curve_plots'
-#     log_dir = os.path.join(runs_dir, args.exp_name)
-#     config_class = Dict(yaml.load(open(os.path.join(cfg_dir, args.config_class))))
-#     config_gan = convert_to_float(
-#         yaml.load(open('/home/orthopred/repositories/conn_gan/gan_manual_search/runs/cond_gan_debug_12/config.yaml')))
-#     trainer = Trainer(config_class, config_gan, args.gpu_id, log_dir, args.dataset_root)
-#     mode_str = 'real'
-#     losses, accs = trainer.run_train_cycle(mode_str, config_class.num_training_examples)
-#
-#
-#     plt.plot(config_class.num_training_examples, losses)
-#     plt.xlabel('Number of real training examples')
-#     plt.ylabel('Test loss')
-#     plt.title('Test loss with respect to available training examples')
-#     plt.savefig(os.path.join(log_dir, 'testlosses.png'))
-#     plt.savefig(os.path.join(log_dir, 'testlosses.eps'))
-#     plt.close('all')
-#     plt.plot(config_class.num_training_examples, accs)
-#     plt.xlabel('Number of real training examples')
-#     plt.ylabel('Test accuracy')
-#     plt.title('Test accuracy with respect to available training examples')
-#     plt.savefig(os.path.join(log_dir, 'testaccs.png'))
-#     plt.savefig(os.path.join(log_dir, 'testaccs.eps'))
-#     plt.close('all')
-

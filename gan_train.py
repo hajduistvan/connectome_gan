@@ -1,20 +1,12 @@
 import argparse
 import torch
 import yaml
-from addict import Dict
 from data_handling.dataset import UKBioBankDataset
 import time
 import os
-import csv
 import numpy as np
 from shutil import copyfile
-from models.classifier import ConnectomeConvNet
 from models.cond_gan import CondGAN
-from models.dual_gan import DualGAN
-from decimal import Decimal
-
-
-
 
 
 def convert_to_float(df):
@@ -29,39 +21,32 @@ def convert_to_float(df):
     return df
 
 
-
 def main(args):
 
-
-    runs_path = '/home/orthopred/repositories/conn_gan/gan_manual_search/runs'
-    config_dir_path = '/home/orthopred/repositories/conn_gan/config'
-    log_dir = os.path.join(runs_path, args.exp_name)
+    # Simple training script.
+    log_dir = os.path.join(args.runs_path, args.exp_name)
     os.makedirs(log_dir, exist_ok=True)
 
-    config_file = os.path.join(config_dir_path, args.config)
-    config = convert_to_float(yaml.load(open(config_file)))
-    copyfile(config_file, os.path.join(log_dir, 'config.yaml'))
+    config = convert_to_float(yaml.load(open(args.config)))
+    copyfile(args.config, os.path.join(log_dir, 'config.yaml'))
 
     np.random.seed(config['man_seed'])
     torch.manual_seed(config['man_seed'])
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
 
-
     model_cls, model_py = {
-        'condgan': (CondGAN, '/home/orthopred/repositories/conn_gan/models/cond_gan.py'),
-        'dualgan': (DualGAN, '/home/orthopred/repositories/conn_gan/models/dual_gan.py')
+        'condgan': (CondGAN, os.path.join(args.models_path, 'cond_gan.py')),
     }[config['gan_name']]
     copyfile(model_py, os.path.join(log_dir, 'gan_model.py'))
 
-
-
     # Datasets & Loaders
-    train_dataset = UKBioBankDataset(args.dataset_root, None, 'train')
-    val_dataset = UKBioBankDataset(args.dataset_root, None, 'val')
+    train_dataset = UKBioBankDataset(args.dataset_file, None, 'train')
+    val_dataset = UKBioBankDataset(args.dataset_file, None, 'val')
 
     val_loader = torch.utils.data.DataLoader(val_dataset, config['batch_size'], shuffle=False,
                                              num_workers=config['num_workers'])
+
 
     start_time = time.time()
     print("\n########################################################")
@@ -71,9 +56,10 @@ def main(args):
         val_loader,
         args.gpu_id,
         config['fid_interval'],
-        '0',
         log_dir,
         config['num_epochs'],
+        args.cnn_run_dir,
+        args.metric_model_id
     )
 
     model.run_train()
@@ -83,11 +69,17 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
+
     parser.add_argument("--exp_name", type=str, default='debug')
-    parser.add_argument("--config", type=str, default='gan_cfg.yaml')
+    parser.add_argument("--config", type=str, default=os.path.join(os.getcwd(), 'config/gan.yaml'))
+    parser.add_argument("--runs_path", type=str, default=os.path.join(os.getcwd(), 'gan_runs'))
+    parser.add_argument("--models_path", type=str, default=os.path.join(os.getcwd(), 'models'))
     parser.add_argument("--gpu_id", type=int, default=0)
-    parser.add_argument("--dataset_root", type=str)
-    parser.add_argument("--num_epochs", type=int, default=100)
+    parser.add_argument("--metric_model_id", type=int, default=0)
+    parser.add_argument("--dataset_file", type=str, help='Path to the dataset .npz file',
+                        default=os.path.join(os.getcwd(), 'partitioned_dataset_gender.npz'))
+    parser.add_argument("--cnn_run_dir", type=str, default=os.path.join(os.getcwd(), 'cnn_arch_search/runs'))
+    parser.add_argument("--num_epochs", type=int, default=10)
     args = parser.parse_args()
 
     main(args)

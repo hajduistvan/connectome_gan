@@ -1,20 +1,17 @@
 import torch
-from gan_metrics.calc_metrics import calc_stats, calculate_frechet_distance, calc_bin_diffs, count_bins
 from data_handling.dataset import UKBioBankDataset
-from gan_metrics.select_cnn import get_model
 from gan_metrics.calc_metrics import MetricCalculator
 import matplotlib.pyplot as plt
 import numpy as np
 import os
 import argparse
-import torch.nn.functional as F
 from noised_learning import NoisedTrainer
 
 
-def test_eval_fid(model_id, gpu_id, batch_size, aug_fn, epochs, log_dir, alpha, save_dir):
-    dataset_root = '/home/orthopred/repositories/Datasets/UK_Biobank'
-    save_dir = os.path.join('/home/orthopred/repositories/conn_gan/experiment_results', save_dir)
-    noise_trainer = NoisedTrainer(gpu_id, save_dir, dataset_root)
+def test_eval_fid(model_id, gpu_id, batch_size, aug_fn, epochs, log_dir, alpha, save_dir, dataset_root):
+
+    noise_trainer = NoisedTrainer(gpu_id, save_dir, dataset_root,
+                                  cfg=args.cfg)
 
     os.makedirs(log_dir, exist_ok=True)
     dataset2 = UKBioBankDataset(dataset_root, None, 'train')
@@ -36,7 +33,7 @@ def test_eval_fid(model_id, gpu_id, batch_size, aug_fn, epochs, log_dir, alpha, 
                 calcer.feed_batch(*aug_inp)
                 if epoch == 0 and step == 0:
                     calcer.scatter_plot_activations(os.path.join(save_dir, str(alpha) + '.svg'))
-                _, _, wad = calcer.calc_class_agnostic_fid()
+                _, _, wad = calcer.calc_wad()
             if epoch == 0 and step == 0:
                 noise_trainer.set_train_loader(aug_fn)
                 testloss, testacc = noise_trainer.run_train_cycle(alpha)
@@ -51,14 +48,13 @@ def test_eval_fid(model_id, gpu_id, batch_size, aug_fn, epochs, log_dir, alpha, 
 
 def get_diag_noise_fn_tan(alpha):
     def add_uni_noise(x, y):
-        noise = 2*torch.rand_like(x)-1
+        noise = 2 * torch.rand_like(x) - 1
         return (1 - alpha) * x + alpha * (noise + noise.transpose(-1, -2) / 2), y
 
     return add_uni_noise
 
 
-def test_fid_monotonities(model_id, batch_size, aug_str, epochs, gpu_id, save_dir):
-    save_dir = os.path.join('/home/orthopred/repositories/conn_gan/experiment_results', save_dir)
+def test_fid_monotonities(model_id, batch_size, epochs, gpu_id, save_dir, dataset_root):
     os.makedirs(save_dir, exist_ok=True)
     alphas = np.array([0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1])
     xlabel = 'Noise-original ratio'
@@ -70,7 +66,7 @@ def test_fid_monotonities(model_id, batch_size, aug_str, epochs, gpu_id, save_di
     for alpha in alphas:
         aug_fn = get_diag_noise_fn_tan(alpha)
         wad_mean, wad_std, testloss, testacc = test_eval_fid(model_id, gpu_id, batch_size, aug_fn, epochs, save_dir,
-                                                             alpha, save_dir)
+                                                             alpha, dataset_root=dataset_root)
         wad_means.append(wad_mean)
         wad_stds.append(2 * wad_std)
         testlosses.append(testloss)
@@ -123,9 +119,7 @@ def scatter_plot_batch_activations(activations, labels, filename=None):
     plt.close('all')
 
 
-def plot_experiment(exp_name):
-    save_dir = os.path.join('/home/orthopred/repositories/conn_gan/experiment_results', exp_name)
-
+def plot_experiment(save_dir):
     alphas = np.array([0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1])
     xlabel = 'Noise-original ratio'
     numpy_name = os.path.join(save_dir, "wad.npy")
@@ -134,8 +128,8 @@ def plot_experiment(exp_name):
 
     wad_numpy = np.load(numpy_name)
     wad_means, wad_stds, testlosses, testaccs = wad_numpy[0], wad_numpy[1], wad_numpy[2], wad_numpy[3]
-    figsize=(5,4)
-    fig=plt.figure(figsize=figsize)
+    figsize = (5, 4)
+    fig = plt.figure(figsize=figsize)
     ax = fig.add_subplot(1, 1, 1)
     ax.errorbar(alphas, wad_means, yerr=wad_stds)
     plt.grid(which='both', axis='both')
@@ -148,7 +142,7 @@ def plot_experiment(exp_name):
     fig.savefig(png_name)
     plt.close('all')
 
-    fig=plt.figure(figsize=figsize)
+    fig = plt.figure(figsize=figsize)
     ax = fig.add_subplot(1, 1, 1)
     ax.errorbar(alphas, testlosses, yerr=0)
     plt.grid(which='both', axis='both')
@@ -161,32 +155,21 @@ def plot_experiment(exp_name):
     fig.savefig(png_name.replace('wad', 'loss'))
     plt.close('all')
 
-    # fig=plt.figure(figsize=figsize)
-    # ax = fig.add_subplot(1, 1, 1)
-    # ax.errorbar(alphas, testaccs, yerr=0)
-    # plt.grid(which='both', axis='both')
-    # plt.title('Test acc with respect to noise added to data')
-    # plt.xlabel(xlabel)
-    # plt.ylabel('Test acc')
-    # # plt.xscale('log')
-    # # plt.yscale('log')
-    #
-    # fig.savefig(eps_name.replace('wad', 'acc'))
-    # fig.savefig(png_name.replace('wad', 'acc'))
-    # plt.close('all')
 
 
 if __name__ == '__main__':
-    model_id = 1187
+    model_id = 887
     batch_size = 7000
     epochs = 50
     parser = argparse.ArgumentParser()
     parser.add_argument("--exp_name", type=str, default='uni_0528_6')
+    parser.add_argument("--save_dir", type=str, default='/home/orthopred/repositories/conn_gan/experiment_results')
+    parser.add_argument("--cfg", type=str, default='/home/orthopred/repositories/conn_gan/config/learning_loss.yaml')
+    parser.add_argument("--dataset_root", type=str, default='/home/orthopred/repositories/Datasets/UK_Biobank')
     parser.add_argument("--gpu_id", type=int, default=1)
-    parser.add_argument("--aug", type=str, default='uniform')
     parser.add_argument("--load", type=str, default='1')
     args = parser.parse_args()
     if args.load == '0':
-        test_fid_monotonities(model_id, batch_size, args.aug, epochs, args.gpu_id, args.exp_name)
+        test_fid_monotonities(model_id, batch_size, epochs, args.gpu_id, save_dir=os.path.join(args.save_dir, args.exp_name), dataset_root=args.dataset_root)
     else:
-        plot_experiment(args.exp_name)
+        plot_experiment(save_dir=os.path.join(args.save_dir, args.exp_name))

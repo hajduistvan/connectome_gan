@@ -5,9 +5,7 @@ https://github.com/hajduistvan/connectome_gan
 """
 import torch.nn as nn
 import torch
-from ast import literal_eval as make_tuple
 import os
-from torchnet.meter import MovingAverageValueMeter
 from tensorboardX import SummaryWriter
 from tqdm import tqdm
 import numpy as np
@@ -15,7 +13,9 @@ from decimal import Decimal
 
 
 class ConnectomeConvNet(nn.Module):
-
+    """
+    Class for the classifier.
+    """
     def __init__(
             self,
             layers,
@@ -32,12 +32,25 @@ class ConnectomeConvNet(nn.Module):
             allow_stop=True,
             verbose=True
     ):
+        """
+        :param layers: the width of the conv1 and conv2 layers. (c1, c2).
+        :param lr: learning rate (constant) for the regural-old nesterov-SGD.
+        :param mom: momentum.
+        :param wd: weight decay.
+        :param train_loader: torch Loader for the training set
+        :param val_loader: same for validation dataset
+        :param gpu_id: ...
+        :param val_interval: steps between validations (1 is good enough)
+        :param run_id: just a number to clarify saved files.
+        :param log_dir: directory of the saved files and tensorboard summaries.
+        :param max_epochs:
+        :param allow_stop: if True, val_loss will be watched and training will be stopped when
+        overfitting/convergence detected.
+        :param verbose: Set to False if you don't like too much talking. (supresses print statements)
+        """
         super(ConnectomeConvNet, self).__init__()
-        # self.config = config
-        # self.class_architecture = self.config.ARCHITECTURE.CLASS
         self.exp_name = 'c1_' + str(layers[0]) + '_c2_' + str(layers[1]) + '_lr_' + '%.2E' % Decimal(
             lr) + '_mom_' + '%.2E' % Decimal(mom) + '_wd_' + '%.2E' % Decimal(wd)
-        # self.val_loader = val_loader
         self.layers = layers
         self.log_dir = log_dir
         self.lr = lr
@@ -51,10 +64,12 @@ class ConnectomeConvNet(nn.Module):
         self.max_epochs = max_epochs
         self.allow_stop = allow_stop
         self.verbose = verbose
+
+        # Architecture
         self.layer1 = nn.Sequential(nn.Conv2d(1, self.layers[0], (1, 55)), nn.ReLU())
         self.layer2 = nn.Sequential(nn.Conv2d(self.layers[0], self.layers[1], (55, 1)), nn.ReLU())
-        # self.layer23 = nn.Sequential(nn.Linear(self.layers[1], self.layers[1]), nn.ReLU())
         self.layer3 = nn.Linear(self.layers[1], 1)
+
         self.optimizer = torch.optim.SGD(self.parameters(), lr=self.lr, momentum=self.mom, weight_decay=self.wd,
                                          nesterov=True)
         self.cuda(self.gpu_id)
@@ -78,7 +93,11 @@ class ConnectomeConvNet(nn.Module):
         self.global_step = 0
 
     def forward(self, x):
-
+        """
+        Forward pass.
+        :param x: inputs.
+        :return:
+        """
         x = self.layer1(x)
         x = self.layer2(x)
         x = x.view(-1, self.layers[1])
@@ -86,6 +105,11 @@ class ConnectomeConvNet(nn.Module):
         return x
 
     def train_step(self, inputs):
+        """
+        One train step
+        :param inputs: inputs to the net.
+        :return:
+        """
         data, labels = inputs
         data = data.cuda(self.gpu_id)
         labels = labels.view(-1).cuda(self.gpu_id)
@@ -101,14 +125,14 @@ class ConnectomeConvNet(nn.Module):
         self.global_step += 1
 
     def get_acc(self, outputs, labels):
-        threshold = 0.5
         """
-        Operates on detached cuda tensors!
-        For binary classification
+        Calculates accuracy. Operates on detached cuda tensors!
+        For binary classification.
         :param outputs:
         :param labels:
         :return:
         """
+        threshold = 0.5
         preds = (torch.sigmoid(outputs) >
                  threshold).long().squeeze(0)
         total = labels.size(0)
@@ -117,6 +141,10 @@ class ConnectomeConvNet(nn.Module):
         return accuracy
 
     def validate(self):
+        """
+        Validates the Net.
+        :return:
+        """
         self.eval()
         outputs, labels_list = [], []
         with torch.no_grad():
@@ -151,6 +179,10 @@ class ConnectomeConvNet(nn.Module):
         return val_loss, val_acc
 
     def run_train(self):
+        """
+        Runs the training procedure.
+        :return:
+        """
         self.train()
         self.val_losses = []
         for epoch in tqdm(
@@ -199,6 +231,11 @@ class ConnectomeConvNet(nn.Module):
         return should_stop
 
     def test(self, test_loader):
+        """
+        Tests the Net. Loads the weights for the corresponding run.
+        :param test_loader:
+        :return:
+        """
         state_dict = torch.load(os.path.join(self.log_dir, str(self.gpu_id) + str(self.run_id) + ".pth"))['state_dict']
         self.load_state_dict(state_dict)
         self.eval()
@@ -219,17 +256,19 @@ class ConnectomeConvNet(nn.Module):
 
 
 class ConnectomeConvInferenceNet(nn.Module):
+    """
+    Same class as above, but forward pass returns the activations of the layers as well, and no training-related stuff.
+     Needed for the Reference Net.
+    """
     def __init__(
             self,
             layers,
             state_dict,
             gpu_id,
-            log_dir=None,
     ):
         super(ConnectomeConvInferenceNet, self).__init__()
         self.c1, self.c2 = layers
         self.gpu_id = gpu_id
-        # self.log_dir = log_dir
         self.layer1 = nn.Sequential(nn.Conv2d(1, self.c1, (1, 55)), nn.ReLU())
         self.layer2 = nn.Sequential(nn.Conv2d(self.c1, self.c2, (55, 1)), nn.ReLU())
         self.layer3 = nn.Linear(self.c2, 1)
@@ -238,9 +277,7 @@ class ConnectomeConvInferenceNet(nn.Module):
 
     def forward(self, x):
         self.eval()
-        # with torch.no_grad:
         x1 = self.layer1(x)  # shape: [batch_size, c1, 55, 1]
-        x1_no_nonlin = self.layer1[0](x)
 
         x2 = self.layer2(x1).view(-1, self.c2)  # shape: [batch_size, c2]
         x2_no_nonlin = self.layer2[0](x1)

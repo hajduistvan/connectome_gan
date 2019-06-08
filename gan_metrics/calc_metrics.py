@@ -1,7 +1,4 @@
 import os
-import pathlib
-from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
-
 import numpy as np
 from scipy import linalg
 from gan_metrics.select_cnn import get_model
@@ -62,23 +59,11 @@ def calculate_frechet_distance(mu1, mu2, sigma1, sigma2, eps=1e-6):
     return diff.dot(diff) + np.trace(sigma1) + np.trace(sigma2) - 2 * tr_covmean
 
 
-def calc_bin_diffs(hist1, hist2):
-    return np.sum((hist1 - hist2) ** 2)
-
-
-def count_bins(act):
-    bins = 20
-    rng = [[-5, 7], [-0.06, 0.02]]
-    act = act.cpu().numpy()
-    hist, xedges, yedges = np.histogram2d(act[:, 0], act[:, 1], bins=bins, range=rng)
-    return hist
-
-
 def calc_stats(act):
     """
     Calculates mean and covariance of activations.
     :param act: Torch cuda tensor of activations. First dim should be batch dimension.
-    :return:
+    :return: mean and covariance matrix
     """
     act = act.view(act.shape[0], -1).cpu().numpy()
     mu = np.mean(act, axis=0)
@@ -87,83 +72,95 @@ def calc_stats(act):
 
 
 class MetricCalculator:
+    """
+    Class for calculating GAN metrics, mostly used for WAD calculation (calc_wad() function)
+    """
+
     def __init__(
             self,
             model_id,
             real_dataset,
             batch_size,
             gpu_id,
-            batch=None
+            cnn_run_dir,
+            batch=None,
     ):
+        """
+        :param model_id: the id of the Reference Network. The row number in the final_result csv from the cnn search.
+        :param real_dataset: Real samples, since we compare generated matrices' activations to activations of these
+        :param batch_size: number of activations we want to analyze
+        :param gpu_id:
+        :param cnn_run_dir: Directory where the saved (from cnn_search.py) CNNs are
+        :param batch: can be initialized with a generated or real batch. if None, real_dataset is used to obtain
+        reference batch.
+
+        r_act_2: real activations
+        act_2: generated activations
+
+        """
         self.model_id = model_id
         self.real_dataset = real_dataset
         self.batch_size = batch_size
         self.gpu_id = gpu_id
-        self.w = [-1.5350, -0.0037, 1.7972]
-        self.inference_net = get_model(self.gpu_id, concat_list_idx=self.model_id)
-        # print('inferencenet layer3 weights:')
-        # print(self.inference_net.layer3.weight)
-        # print(self.inference_net.layer3.bias)
+        self.cnn_run_dir = cnn_run_dir
+        self.inference_net = get_model(self.gpu_id, concat_list_idx=self.model_id, run_dir=self.cnn_run_dir, row=None)
+        self.w = [*list(self.inference_net.layer3.weight.data.cpu().numpy()[0]) + list(
+            self.inference_net.layer3.bias.data.cpu().numpy())]  # last layer's weights & bias
+
         if batch is None:
             loader = torch.utils.data.DataLoader(self.real_dataset, batch_size, shuffle=False)
             iterloader = iter(loader)
             batch = next(iterloader)
+
         with torch.no_grad():
             self.labels = batch[1]
             self.batch = batch[0]
-            _, self.r_act_2, self.r_act_3 = self.inference_net(self.batch.cuda(self.gpu_id))
-
-            self.mu2, self.sigma2 = calc_stats(self.r_act_2)
-            self.hist2 = count_bins(self.r_act_2)
-            self.hist2_c0 = count_bins(self.r_act_2[self.labels.view(-1) == 0])
-            self.hist2_c1 = count_bins(self.r_act_2[self.labels.view(-1) == 1])
+            _, self.r_act_2, _ = self.inference_net(self.batch.cuda(self.gpu_id))
 
             self.mu2_c0, self.sigma2_c0 = calc_stats(self.r_act_2[self.labels.view(-1) == 0])
             self.mu2_c1, self.sigma2_c1 = calc_stats(self.r_act_2[self.labels.view(-1) == 1])
 
     def reset_ref_batch(self, batch):
+        """
+        Feed batch (reset) to slot 1, aka. the real examples.
+        :param batch:
+        :return:
+        """
         with torch.no_grad():
             self.labels = batch[1]
             self.batch = batch[0]
-            _, self.r_act_2, self.r_act_3 = self.inference_net(self.batch.cuda(self.gpu_id))
-
-            self.mu2, self.sigma2 = calc_stats(self.r_act_2)
-            # self.hist2 = count_bins(self.r_act_2)
-            # self.hist2_c0 = count_bins(self.r_act_2[self.labels.view(-1) == 0])
-            # self.hist2_c1 = count_bins(self.r_act_2[self.labels.view(-1) == 1])
+            _, self.r_act_2, _ = self.inference_net(self.batch.cuda(self.gpu_id))
 
             self.mu2_c0, self.sigma2_c0 = calc_stats(self.r_act_2[self.labels.view(-1) == 0])
             self.mu2_c1, self.sigma2_c1 = calc_stats(self.r_act_2[self.labels.view(-1) == 1])
 
     def feed_batch(self, generated_batch, generated_labels):
-        _, self.act2, self.act3 = self.inference_net(generated_batch.cuda(self.gpu_id))
+        """
+        Feed batch to slot 2, aka. the generated batch.
+        :param generated_batch: matrices
+        :param generated_labels: labels
+        :return:
+        """
+        _, self.act2, _ = self.inference_net(generated_batch.cuda(self.gpu_id))
         self.g_labels = generated_labels
 
-    def calc_fid(self):
-        mu1, sigma1 = calc_stats(self.act2)
-        fid_score = calculate_frechet_distance(mu1, self.mu2, sigma1, self.sigma2)
-        return fid_score
-
-    def calc_class_agnostic_fid(self):
+    def calc_wad(self):
+        """
+        Calculates Wasserstein Activation Distance of the two activation distribution.
+        :return: WAD value.
+        """
         mu1_c0, sigma1_c0 = calc_stats(self.act2[self.g_labels.view(-1) == 0])
         mu1_c1, sigma1_c1 = calc_stats(self.act2[self.g_labels.view(-1) == 1])
         fid_c0 = calculate_frechet_distance(mu1_c0, self.mu2_c0, sigma1_c0, self.sigma2_c0)
         fid_c1 = calculate_frechet_distance(mu1_c1, self.mu2_c1, sigma1_c1, self.sigma2_c1)
-        return fid_c0, fid_c1, (fid_c0+fid_c1)/2
-
-    def calc_bin_class_agnostic(self):
-        hist1_c0 = count_bins(self.act2[self.g_labels.view(-1) == 0])
-        hist1_c1 = count_bins(self.act2[self.g_labels.view(-1) == 1])
-        bin_dist_c0 = calc_bin_diffs(hist1_c0, self.hist2_c0)
-        bin_dist_c1 = calc_bin_diffs(hist1_c1, self.hist2_c1)
-        return bin_dist_c0, bin_dist_c1, (bin_dist_c0+bin_dist_c1)/2
-
-    def calc_bin_dist(self):
-        hist1 = count_bins(self.act2)
-        bin_dist = calc_bin_diffs(hist1, self.hist2)
-        return bin_dist
+        return (fid_c0 + fid_c1) / 2
 
     def scatter_plot_activations(self, filename):
+        """
+        Plots the activations, from gen and real examples.
+        :param filename: filename to save the files to.
+        :return: saves scatter plot to .png and .svg files.
+        """
         y = np.linspace(-0.06, 0.02)
         x = -self.w[2] / self.w[0] - self.w[1] / self.w[0] * y
         plt.plot(x, y)
@@ -185,7 +182,13 @@ class MetricCalculator:
         plt.savefig(filename)
         plt.savefig(filename.replace('svg', 'png'))
         plt.close('all')
+
     def plot_empty_scatter(self, filename):
+        """
+        Plots activations only for real examples.
+        :param filename: same as above.
+        :return: also.
+        """
         y = np.linspace(-0.06, 0.02)
         x = -self.w[2] / self.w[0] - self.w[1] / self.w[0] * y
         plt.plot(x, y)
@@ -206,16 +209,23 @@ class MetricCalculator:
 
         plt.close('all')
 
-    def calc_crossentropy(self):
-        ce_loss = torch.nn.functional.binary_cross_entropy_with_logits(self.act3.view(-1), self.g_labels.float())
-        return ce_loss
+
+if __name__ == '__main__':
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--dataset_file", type=str, default=os.path.join(os.getcwd(), 'partitioned_dataset_gender.npz'))
+    parser.add_argument("--out_dir", type=str, default=os.path.join(os.getcwd(), 'cnn_arch_search'))
+    parser.add_argument("--cnn_run_dir", type=str,
+                        default=os.path.join(os.getcwd(), 'cnn_arch_search/runs'))
+    parser.add_argument("--model_id", type=int, default=887)
 
 
-if __name__=='__main__':
-    metric_model_id = 1187
+    args = parser.parse_args()
     batch_size = 7000
-    gpu_id=0
+    gpu_id = 0
     from data_handling.dataset import UKBioBankDataset
-    dataset = UKBioBankDataset('/home/orthopred/repositories/Datasets/UK_Biobank')
-    calcer = MetricCalculator(metric_model_id, dataset, batch_size, gpu_id)
-    calcer.plot_empty_scatter(os.path.join('/home/orthopred/repositories/conn_gan/cnn_arch_search', 'empty_scatter.png'))
+
+    dataset = UKBioBankDataset(args.dataset_file)
+    calcer = MetricCalculator(args.model_id, dataset, batch_size, gpu_id, args.cnn_run_dir)
+    calcer.plot_empty_scatter(os.path.join(args.out_dir, 'empty_scatter.png'))

@@ -2,12 +2,12 @@ man_seed: 420911
 batch_size: 16348
 num_workers: 0
 conv1:
-  min_width: 256
-  max_width: 512
+  min_width: 2
+  max_width: 256
   log_step: 2
 conv2:
-  min_width: 256
-  max_width: 512
+  min_width: 2
+  max_width: 256
   log_step: 2
 lr:
   min_val: 3e-5
