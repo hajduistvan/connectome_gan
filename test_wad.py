@@ -8,13 +8,12 @@ import argparse
 from noised_learning import NoisedTrainer
 
 
-def test_eval_fid(model_id, gpu_id, batch_size, aug_fn, epochs, log_dir, alpha, save_dir, dataset_root):
-
-    noise_trainer = NoisedTrainer(gpu_id, save_dir, dataset_root,
+def test_eval_fid(model_id, gpu_id, batch_size, aug_fn, epochs, log_dir, alpha, save_dir, dataset_file):
+    noise_trainer = NoisedTrainer(gpu_id, save_dir, dataset_file,
                                   cfg=args.cfg)
 
     os.makedirs(log_dir, exist_ok=True)
-    dataset2 = UKBioBankDataset(dataset_root, None, 'train')
+    dataset2 = UKBioBankDataset(dataset_file, None, 'train')
     loader2 = torch.utils.data.DataLoader(dataset2, batch_size, shuffle=True)
     wad_list = []
     max_steps = len(loader2) // 2
@@ -54,7 +53,7 @@ def get_diag_noise_fn_tan(alpha):
     return add_uni_noise
 
 
-def test_fid_monotonities(model_id, batch_size, epochs, gpu_id, save_dir, dataset_root):
+def test_fid_monotonities(model_id, batch_size, epochs, gpu_id, save_dir, dataset_file):
     os.makedirs(save_dir, exist_ok=True)
     alphas = np.array([0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1])
     xlabel = 'Noise-original ratio'
@@ -66,7 +65,7 @@ def test_fid_monotonities(model_id, batch_size, epochs, gpu_id, save_dir, datase
     for alpha in alphas:
         aug_fn = get_diag_noise_fn_tan(alpha)
         wad_mean, wad_std, testloss, testacc = test_eval_fid(model_id, gpu_id, batch_size, aug_fn, epochs, save_dir,
-                                                             alpha, dataset_root=dataset_root)
+                                                             alpha, dataset_file=dataset_file)
         wad_means.append(wad_mean)
         wad_stds.append(2 * wad_std)
         testlosses.append(testloss)
@@ -156,20 +155,21 @@ def plot_experiment(save_dir):
     plt.close('all')
 
 
-
 if __name__ == '__main__':
     model_id = 887
     batch_size = 7000
     epochs = 50
     parser = argparse.ArgumentParser()
-    parser.add_argument("--exp_name", type=str, default='uni_0528_6')
-    parser.add_argument("--save_dir", type=str, default='/home/orthopred/repositories/conn_gan/experiment_results')
-    parser.add_argument("--cfg", type=str, default='/home/orthopred/repositories/conn_gan/config/learning_loss.yaml')
-    parser.add_argument("--dataset_root", type=str, default='/home/orthopred/repositories/Datasets/UK_Biobank')
+    parser.add_argument("--exp_name", type=str, default='debug')
+    parser.add_argument("--save_dir", type=str, default=os.path.join(os.getcwd(), 'experiment_results'))
+    parser.add_argument("--cfg", type=str, default=os.path.join(os.getcwd(), 'config/learning_loss.yaml'))
+    parser.add_argument("--dataset_file", type=str, help='Path to the dataset .npz file',
+                        default=os.path.join(os.getcwd(), 'partitioned_dataset_gender.npz'))
     parser.add_argument("--gpu_id", type=int, default=1)
     parser.add_argument("--load", type=str, default='1')
     args = parser.parse_args()
     if args.load == '0':
-        test_fid_monotonities(model_id, batch_size, epochs, args.gpu_id, save_dir=os.path.join(args.save_dir, args.exp_name), dataset_root=args.dataset_root)
+        test_fid_monotonities(model_id, batch_size, epochs, args.gpu_id,
+                              save_dir=os.path.join(args.save_dir, args.exp_name), dataset_file=args.dataset_file)
     else:
         plot_experiment(save_dir=os.path.join(args.save_dir, args.exp_name))

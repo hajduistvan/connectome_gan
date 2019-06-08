@@ -13,7 +13,6 @@ import os
 import matplotlib.pyplot as plt
 
 
-
 def convert_to_float(df):
     for k, v in df.items():
         if type(v) == str:
@@ -26,9 +25,9 @@ def convert_to_float(df):
     return df
 
 
-def plot_wad(ckpts_dir, save_dir, cfg_file, dataset_root):
+def plot_wad(ckpts_dir, save_dir, cfg_file, dataset_file):
     cfg = convert_to_float(yaml.load(open(cfg_file)))
-    train_dataset = UKBioBankDataset(dataset_root, None, 'train')
+    train_dataset = UKBioBankDataset(dataset_file, None, 'train')
 
     val_loader = torch.utils.data.DataLoader(train_dataset, cfg['batch_size'], shuffle=False,
                                              num_workers=cfg['num_workers'])
@@ -69,9 +68,9 @@ def plot_wad(ckpts_dir, save_dir, cfg_file, dataset_root):
     plt.close('all')
 
 
-def plot_wasserstein_loss(ckpts_dir, save_dir, cfg_file, dataset_root):
+def plot_wasserstein_loss(ckpts_dir, save_dir, cfg_file, dataset_file):
     cfg = convert_to_float(yaml.load(open(cfg_file)))
-    train_dataset = UKBioBankDataset(dataset_root, None, 'train')
+    train_dataset = UKBioBankDataset(dataset_file, None, 'train')
 
     val_loader = torch.utils.data.DataLoader(train_dataset, cfg['batch_size'], shuffle=False,
                                              num_workers=cfg['num_workers'])
@@ -100,14 +99,14 @@ def plot_wasserstein_loss(ckpts_dir, save_dir, cfg_file, dataset_root):
     plt.close('all')
 
 
-def calc_learner_loss(ckpt_dir, save_dir, gan_cfg_file, learner_cfg_file, dataset_root, cnn_arch_dir):
+def calc_learner_loss(ckpt_dir, save_dir, gan_cfg_file, learner_cfg_file, dataset_file, cnn_arch_dir):
     # steps = [0, 50, 100, 150, 174]
     # steps = [25, 75, 125, 180]
     # steps = [280, 320]
     steps = [254, 300]
 
-    test_dataset = UKBioBankDataset(dataset_root, None, 'test')
-    val_dataset = UKBioBankDataset(dataset_root, None, 'val')
+    test_dataset = UKBioBankDataset(dataset_file, None, 'test')
+    val_dataset = UKBioBankDataset(dataset_file, None, 'val')
 
     test_loader = torch.utils.data.DataLoader(test_dataset, learner_cfg_file.batch_size, shuffle=False,
                                               num_workers=learner_cfg_file.num_workers)
@@ -161,12 +160,12 @@ def calc_learner_loss(ckpt_dir, save_dir, gan_cfg_file, learner_cfg_file, datase
     np.save(os.path.join(save_dir, 'loss_result.npy'), np.array([steps, test_losses, test_accs]))
 
 
-def plot_generated_matrices(ckpt_dir, save_dir, dataset_root):
+def plot_generated_matrices(ckpt_dir, save_dir, dataset_file):
     os.makedirs(save_dir, exist_ok=True)
     fnames = ['gen_img_it_' + str(i) + '.npy' for i in range(0, 181)]
 
     # real example
-    train_dataset = UKBioBankDataset(dataset_root, None, 'train')
+    train_dataset = UKBioBankDataset(dataset_file, None, 'train')
     loader = torch.utils.data.DataLoader(train_dataset, 200, shuffle=True,
                                          num_workers=0)
     iterloader = iter(loader)
@@ -205,23 +204,25 @@ def plot_generated_matrices(ckpt_dir, save_dir, dataset_root):
     if __name__ == '__main__':
         import argparse
         parser = argparse.ArgumentParser()
-        parser.add_argument("--dataset_root", type=str, default='/home/orthopred/repositories/Datasets/UK_Biobank', help='Dir of the dataset .npz file')
-        parser.add_argument("--save_dir", type=str, default='/home/orthopred/repositories/conn_gan/gan_manual_search/runs/cond_gan_debug_24/plots')
-        parser.add_argument("--ckpts_dir", type=str, default='/home/orthopred/repositories/conn_gan/gan_manual_search/runs/cond_gan_debug_24/ckpts')
-        parser.add_argument("--cnn_runs_dir", type=str, default='/home/orthopred/repositories/Datasets/UK_Biobank')
+        parser.add_argument("--dataset_file", type=str, help='Path to the dataset .npz file',
+                            default=os.path.join(os.getcwd(), 'partitioned_dataset_gender.npz'))
+        parser.add_argument("--save_dir", type=str,
+                            default=os.path.join(os.getcwd(), 'gan_runs/cond_gan_debug_24/plots'))
+        parser.add_argument("--ckpts_dir", type=str,
+                            default=os.path.join(os.getcwd(), 'gan_runs/cond_gan_debug_24/ckpts'))
+        parser.add_argument("--cnn_runs_dir", type=str, default=os.path.join(os.getcwd(), 'cnn_arch_search'))
 
         parser.add_argument("--gan_cfg_file", type=str,
-                            default='/home/orthopred/repositories/conn_gan/gan_manual_search/runs/cond_gan_debug_24/config.yaml')
+                            default=os.path.join(os.getcwd(), 'gan_runs/cond_gan_debug_24/config.yaml'))
         parser.add_argument("--learner_cfg_file", type=str,
-                            default='/home/orthopred/repositories/conn_gan/config/learning_loss.yaml')
+                            default=os.path.join(os.getcwd(), 'config/learning_loss.yaml'))
 
         args = parser.parse_args()
 
-
         # Uncomment to use desired function!
 
-        # plot_generated_matrices(args.ckpt_dir, args.save_dir, args.dataset_root)
+        # plot_generated_matrices(args.ckpt_dir, args.save_dir, args.dataset_file)
         # plot_wasserstein_loss(args.ckpts_dir, args.save_dir, args.gan_cfg_file)
         # plot_wad(args.ckpts_dir, args.save_dir, args.gan_cfg_file)
-        calc_learner_loss(args.ckpt_dir, args.save_dir, args.gan_cfg_file, args.learner_cfg_file, args.dataset_root,
+        calc_learner_loss(args.ckpt_dir, args.save_dir, args.gan_cfg_file, args.learner_cfg_file, args.dataset_file,
                           args.cnn_arch_dir)
